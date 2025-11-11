@@ -2366,7 +2366,7 @@
         <div style="background: linear-gradient(135deg, rgba(26, 35, 50, 0.95), rgba(15, 22, 32, 0.95)); border-bottom: 3px solid #2a4a5a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <div id="clanPageTitle" style="color: #5abaaa; font-size: 24px; font-weight: bold; text-shadow: 0 0 10px rgba(90, 186, 170, 0.5);">🛡️ <span id="clanDisplayName">Clan Name</span></div>
-                <div id="clanMemberInfo" style="color: #8a9aaa; font-size: 14px; margin-top: 5px;">Members: <span id="clanMemberCount">0</span>/10</div>
+                <div id="clanMemberInfo" style="color: #8a9aaa; font-size: 14px; margin-top: 5px;">Members: <span id="clanMemberCount">0</span>/5</div>
             </div>
             <button id="closeClanPage" style="background: #3a2a2a; color: #fff; border: none; padding: 10px 15px; cursor: pointer; border-radius: 8px; font-size: 18px; font-weight: bold; transition: all 0.3s;">✖</button>
         </div>
@@ -2396,7 +2396,7 @@
 
                         <!-- Members List -->
                         <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 15px; flex: 1; overflow-y: auto;">
-                            <div style="color: #5abaaa; font-weight: bold; margin-bottom: 10px; font-size: 14px;">MEMBERS: <span id="memberCountDisplay">1</span>/10</div>
+                            <div style="color: #5abaaa; font-weight: bold; margin-bottom: 10px; font-size: 14px;">MEMBERS: <span id="memberCountDisplay">1</span>/5</div>
                             <div id="clanMembersList" style="display: flex; flex-direction: column; gap: 8px;">
                                 <!-- Members will be listed here -->
                             </div>
@@ -2599,8 +2599,9 @@
             <button id="closeJoinClan" style="background: #3a2a2a; color: #fff; border: none; padding: 8px 12px; cursor: pointer; border-radius: 5px; font-size: 16px;">✖</button>
         </div>
         <div style="padding: 20px;">
-            <div style="margin-bottom: 15px;">
-                <input type="text" id="searchClanInput" placeholder="Search clans..." style="width: 100%; padding: 10px; background: #0f1620; border: 2px solid #2a3a4a; border-radius: 5px; color: #fff; font-size: 14px; box-sizing: border-box;">
+            <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+                <input type="text" id="searchClanInput" placeholder="Search clans..." style="flex: 1; padding: 10px; background: #0f1620; border: 2px solid #2a3a4a; border-radius: 5px; color: #fff; font-size: 14px; box-sizing: border-box;">
+                <button id="openCreateClanBtn" style="padding: 10px 20px; background: linear-gradient(135deg, #2a5a8a, #1a4a7a); border: 2px solid #3a6a9a; border-radius: 5px; color: #5abaaa; cursor: pointer; font-weight: bold; white-space: nowrap;">+ Create Clan</button>
             </div>
             <div id="clanList" style="max-height: 400px; overflow-y: auto;">
                 <!-- Clan list will be populated here -->
@@ -3120,8 +3121,14 @@ const firebaseConfig = {
             });
             
             document.getElementById('createClanModal').style.display = 'none';
+            document.getElementById('joinClanModal').style.display = 'none';
             updateProfileDisplay();
             showFloatingText(`Clan "${clanName}" created!`, canvas.width / 2, 100, '#5abaaa');
+            
+            // Open the clan page after creation
+            setTimeout(async () => {
+                await openClanPage();
+            }, 500);
             });
         }
 
@@ -3139,6 +3146,15 @@ const firebaseConfig = {
         if (closeJoinClan) {
             closeJoinClan.addEventListener('click', () => {
                 document.getElementById('joinClanModal').style.display = 'none';
+            });
+        }
+
+        // Open create clan modal from join clan modal
+        const openCreateClanBtn = document.getElementById('openCreateClanBtn');
+        if (openCreateClanBtn) {
+            openCreateClanBtn.addEventListener('click', () => {
+                document.getElementById('joinClanModal').style.display = 'none';
+                document.getElementById('createClanModal').style.display = 'block';
             });
         }
 
@@ -3304,7 +3320,7 @@ const firebaseConfig = {
                     if (clan.name.toLowerCase().includes(searchTerm) || clan.tag.toLowerCase().includes(searchTerm)) {
                         foundClans = true;
                         
-                        const isFull = (clan.memberCount || 0) >= 10;
+                        const isFull = (clan.memberCount || 0) >= 5;
                         const isInviteOnly = clan.inviteOnly || false;
                         const canApply = !isFull && !isInviteOnly;
                         
@@ -3324,7 +3340,7 @@ const firebaseConfig = {
                                         <div style="color: #5a8afa; font-weight: bold; font-size: 16px;">[${clan.tag}] ${clan.name}</div>
                                         ${statusBadge}
                                     </div>
-                                    <div style="color: #8a9aaa; font-size: 12px;">Leader: ${clan.leaderName} • Members: ${clan.memberCount || 0}/10</div>
+                                    <div style="color: #8a9aaa; font-size: 12px;">Leader: ${clan.leaderName} • Members: ${clan.memberCount || 0}/5</div>
                                 </div>
                                 ${canApply ? `<button class="applyClanButton" data-clan-id="${clanId}" data-clan-name="[${clan.tag}] ${clan.name}" style="background: linear-gradient(135deg, #2a5a8a, #1a4a7a); color: #5a8afa; border: 2px solid #3a6a9a; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold;">Apply</button>` : ''}
                             </div>
@@ -3740,9 +3756,9 @@ const firebaseConfig = {
             const clanSnapshot = await clanRef.once('value');
             const clan = clanSnapshot.val();
 
-            // Check if clan is full (max 10 members)
-            if ((clan.memberCount || 0) >= 10) {
-                showFloatingText('Clan is full (max 10 members)', canvas.width / 2, 100, '#ff4444');
+            // Check if clan is full (max 5 members)
+            if ((clan.memberCount || 0) >= 5) {
+                showFloatingText('Clan is full (max 5 members)', canvas.width / 2, 100, '#ff4444');
                 return;
             }
 
@@ -3910,7 +3926,7 @@ const firebaseConfig = {
                 const clan = clanSnap.val();
                 const clanId = clanSnap.key;
                 
-                const isFull = (clan.memberCount || 0) >= 10;
+                const isFull = (clan.memberCount || 0) >= 5;
                 const isInviteOnly = clan.inviteOnly || false;
                 const canApply = !isFull && !isInviteOnly;
                 
@@ -3930,7 +3946,7 @@ const firebaseConfig = {
                                 <div style="color: #5a8afa; font-weight: bold; font-size: 16px;">[${clan.tag}] ${clan.name}</div>
                                 ${statusBadge}
                             </div>
-                            <div style="color: #8a9aaa; font-size: 12px;">Leader: ${clan.leaderName} • Members: ${clan.memberCount || 0}/10</div>
+                            <div style="color: #8a9aaa; font-size: 12px;">Leader: ${clan.leaderName} • Members: ${clan.memberCount || 0}/5</div>
                         </div>
                         ${canApply ? `<button class="applyClanButton" data-clan-id="${clanId}" data-clan-name="[${clan.tag}] ${clan.name}" style="background: linear-gradient(135deg, #2a5a8a, #1a4a7a); color: #5a8afa; border: 2px solid #3a6a9a; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold;">Apply</button>` : ''}
                     </div>
@@ -6474,14 +6490,15 @@ const firebaseConfig = {
             ctx.arc(x, y - size * 1.1, size * 0.6, Math.PI, 0);
             ctx.fill();
             
-            // Name
+            // Name (show username if available)
+            const displayName = (playerProfile && playerProfile.username) ? playerProfile.username : 'Player';
             ctx.fillStyle = 'white';
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 3;
             ctx.font = 'bold 14px Arial';
             ctx.textAlign = 'center';
-            ctx.strokeText('Player', x, y - size * 2);
-            ctx.fillText('Player', x, y - size * 2);
+            ctx.strokeText(displayName, x, y - size * 2);
+            ctx.fillText(displayName, x, y - size * 2);
         }
 
         function drawRoom() {
