@@ -2375,10 +2375,8 @@
         <div style="background: rgba(0,0,0,0.3); border-bottom: 2px solid #2a4a5a; display: flex; gap: 5px; padding: 10px 20px; overflow-x: auto;">
             <button class="clan-tab active" data-tab="overview" style="padding: 10px 20px; background: rgba(74, 154, 138, 0.3); border: 2px solid #4a9a8a; border-radius: 8px; color: #5abaaa; cursor: pointer; font-weight: bold; white-space: nowrap; transition: all 0.3s;">🏠 Clan</button>
             <button class="clan-tab" data-tab="quests" style="padding: 10px 20px; background: rgba(20, 30, 40, 0.5); border: 2px solid #2a3a4a; border-radius: 8px; color: #8a9aaa; cursor: pointer; font-weight: bold; white-space: nowrap; transition: all 0.3s;">📋 Quests</button>
-            <button class="clan-tab" data-tab="property" style="padding: 10px 20px; background: rgba(20, 30, 40, 0.5); border: 2px solid #2a3a4a; border-radius: 8px; color: #8a9aaa; cursor: pointer; font-weight: bold; white-space: nowrap; transition: all 0.3s;">🏠 Property</button>
+            <button class="clan-tab" data-tab="storage" style="padding: 10px 20px; background: rgba(20, 30, 40, 0.5); border: 2px solid #2a3a4a; border-radius: 8px; color: #8a9aaa; cursor: pointer; font-weight: bold; white-space: nowrap; transition: all 0.3s;">🏦 Storage</button>
             <button class="clan-tab" data-tab="upgrades" style="padding: 10px 20px; background: rgba(20, 30, 40, 0.5); border: 2px solid #2a3a4a; border-radius: 8px; color: #8a9aaa; cursor: pointer; font-weight: bold; white-space: nowrap; transition: all 0.3s;">⬆️ Upgrades</button>
-            <button class="clan-tab" data-tab="events" style="padding: 10px 20px; background: rgba(20, 30, 40, 0.5); border: 2px solid #2a3a4a; border-radius: 8px; color: #8a9aaa; cursor: pointer; font-weight: bold; white-space: nowrap; transition: all 0.3s;">🎉 Events</button>
-            <button class="clan-tab" data-tab="bosses" style="padding: 10px 20px; background: rgba(20, 30, 40, 0.5); border: 2px solid #2a3a4a; border-radius: 8px; color: #8a9aaa; cursor: pointer; font-weight: bold; white-space: nowrap; transition: all 0.3s;">👹 Bosses</button>
             <button class="clan-tab" data-tab="management" style="padding: 10px 20px; background: rgba(20, 30, 40, 0.5); border: 2px solid #2a3a4a; border-radius: 8px; color: #8a9aaa; cursor: pointer; font-weight: bold; white-space: nowrap; transition: all 0.3s;">⚙️ Management</button>
         </div>
 
@@ -2389,11 +2387,6 @@
                 <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px; height: 100%;">
                     <!-- Left Side - Members and Actions -->
                     <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <!-- Clan Icon -->
-                        <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 15px; text-align: center;">
-                            <div style="width: 80px; height: 80px; margin: 0 auto; background: radial-gradient(circle, #FFD700, #FFA500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);">💰</div>
-                        </div>
-
                         <!-- Members List -->
                         <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 15px; flex: 1; overflow-y: auto;">
                             <div style="color: #5abaaa; font-weight: bold; margin-bottom: 10px; font-size: 14px;">MEMBERS: <span id="memberCountDisplay">1</span>/5</div>
@@ -2411,35 +2404,12 @@
                         </div>
                     </div>
 
-                    <!-- Right Side - Stats and Info -->
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 20px;">
-                            <div style="color: #8a9aaa; font-size: 14px; margin-bottom: 15px;">STATS - Total level: <span id="clanTotalLevel" style="color: #5abaaa; font-weight: bold;">420</span></div>
-                            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px;">
-                                <div style="text-align: center;"><div style="font-size: 32px;">⚔️</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="attackLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">💪</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="strengthLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🛡️</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="defenceLevel">62</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🏹</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="rangedLevel">62</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">✨</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="magicLevel">1</span></div></div>
-                                
-                                <div style="text-align: center;"><div style="font-size: 32px;">❤️</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="hpLevel">56</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🧪</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="prayerLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🔨</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="slayerLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🧵</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="craftingLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🐟</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="fishingLevel">68</span></div></div>
-                                
-                                <div style="text-align: center;"><div style="font-size: 32px;">🍗</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="cookingLevel">48</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">⛏️</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="miningLevel">54</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🔨</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="smithingLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🌿</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="herbLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🏃</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="agilityLevel">1</span></div></div>
-                                
-                                <div style="text-align: center;"><div style="font-size: 32px;">🗡️</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="thievingLevel">57</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🔮</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="runecraftLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🧪</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="potionLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🌱</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="farmingLevel">1</span></div></div>
-                                <div style="text-align: center;"><div style="font-size: 32px;">🎯</div><div style="color: #fff; font-size: 14px; font-weight: bold;">Level: <span id="hunterLevel">1</span></div></div>
-                            </div>
+                    <!-- Right Side - Total Level Display -->
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 40px; text-align: center;">
+                            <div style="color: #8a9aaa; font-size: 18px; margin-bottom: 15px;">Clan Total Level</div>
+                            <div id="clanTotalLevel" style="color: #5abaaa; font-size: 72px; font-weight: bold; text-shadow: 0 0 20px rgba(90, 186, 170, 0.5);">0</div>
+                            <div style="color: #6a7a8a; font-size: 14px; margin-top: 15px;">Combined level of all members</div>
                         </div>
                     </div>
                 </div>
@@ -2449,17 +2419,30 @@
             <div id="tab-quests" class="clan-tab-content" style="display: none;">
                 <div style="color: #8a9aaa; text-align: center; padding: 40px;">Clan Quests - Coming Soon</div>
             </div>
-            <div id="tab-property" class="clan-tab-content" style="display: none;">
-                <div style="color: #8a9aaa; text-align: center; padding: 40px;">Clan Property - Coming Soon</div>
+            <div id="tab-storage" class="clan-tab-content" style="display: none;">
+                <!-- Storage/Vault Interface -->
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                        <div style="color: #5abaaa; font-size: 20px; font-weight: bold; margin-bottom: 10px;">🏦 Clan Vault</div>
+                        <div style="color: #8a9aaa; font-size: 12px;">Purchased space: <span id="purchasedSpaceTab">0</span>/200 • Total space: <span id="totalSpaceTab">0</span>/8</div>
+                    </div>
+                    
+                    <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="coin-icon" style="width: 24px; height: 24px;"></div>
+                                <span id="clanGoldTab" style="color: #FFD700; font-weight: bold; font-size: 18px;">0</span>
+                            </div>
+                            <button id="manageStorageBtnTab" style="padding: 10px 20px; background: linear-gradient(135deg, #2a5a8a, #1a4a7a); border: 2px solid #3a6a9a; border-radius: 8px; color: #5abaaa; cursor: pointer; font-weight: bold;">⚙️ Manage</button>
+                        </div>
+                        <div id="clanStorageGridTab" style="display: grid; grid-template-columns: repeat(8, 60px); gap: 5px; padding: 10px; background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 8px; min-height: 400px;">
+                            <!-- Storage slots will be generated here -->
+                        </div>
+                    </div>
+                </div>
             </div>
             <div id="tab-upgrades" class="clan-tab-content" style="display: none;">
                 <div style="color: #8a9aaa; text-align: center; padding: 40px;">Clan Upgrades - Coming Soon</div>
-            </div>
-            <div id="tab-events" class="clan-tab-content" style="display: none;">
-                <div style="color: #8a9aaa; text-align: center; padding: 40px;">Clan Events - Coming Soon</div>
-            </div>
-            <div id="tab-bosses" class="clan-tab-content" style="display: none;">
-                <div style="color: #8a9aaa; text-align: center; padding: 40px;">Clan Bosses - Coming Soon</div>
             </div>
             <div id="tab-management" class="clan-tab-content" style="display: none;">
                 <div style="color: #8a9aaa; text-align: center; padding: 40px;">Clan Management - Coming Soon</div>
@@ -3418,21 +3401,9 @@ const firebaseConfig = {
             document.getElementById('clanDisplayName').textContent = `[${clanData.tag}] ${clanData.name}`;
             document.getElementById('clanMemberCount').textContent = clanData.memberCount || 0;
             document.getElementById('memberCountDisplay').textContent = clanData.memberCount || 0;
-            document.getElementById('clanTotalLevel').textContent = Object.values(gameState.player.skills).reduce((a, b) => a + b, 0);
             
-            // Update skill levels
-            document.getElementById('attackLevel').textContent = gameState.player.skills.attack || 1;
-            document.getElementById('strengthLevel').textContent = gameState.player.skills.strength || 1;
-            document.getElementById('defenceLevel').textContent = gameState.player.skills.defence || 1;
-            document.getElementById('rangedLevel').textContent = gameState.player.skills.ranged || 1;
-            document.getElementById('magicLevel').textContent = gameState.player.skills.magic || 1;
-            document.getElementById('hpLevel').textContent = gameState.player.skills.hitpoints || 1;
-            document.getElementById('fishingLevel').textContent = gameState.player.skills.fishing || 1;
-            document.getElementById('cookingLevel').textContent = gameState.player.skills.cooking || 1;
-            document.getElementById('miningLevel').textContent = gameState.player.skills.mining || 1;
-            document.getElementById('agilityLevel').textContent = gameState.player.skills.agility || 1;
-            document.getElementById('craftingLevel').textContent = gameState.player.skills.crafting || 1;
-            document.getElementById('farmingLevel').textContent = gameState.player.skills.farming || 1;
+            // Calculate clan total level from all members
+            await updateClanTotalLevel();
 
             // Load clan members
             await loadClanMembers();
@@ -3446,6 +3417,39 @@ const firebaseConfig = {
             initializeClanStorage();
 
             document.getElementById('clanPageModal').style.display = 'block';
+        }
+
+        // Update clan total level
+        async function updateClanTotalLevel() {
+            if (!playerProfile.clanId || !database) return;
+
+            const membersRef = database.ref(`clans/${playerProfile.clanId}/members`);
+            const membersSnapshot = await membersRef.once('value');
+            
+            let totalLevel = 0;
+            
+            if (membersSnapshot.exists()) {
+                const memberPromises = [];
+                
+                membersSnapshot.forEach((memberSnap) => {
+                    const memberId = memberSnap.key;
+                    // Fetch each member's skills
+                    const playerSkillsPromise = database.ref(`players/${memberId}/skills`).once('value');
+                    memberPromises.push(playerSkillsPromise);
+                });
+                
+                const skillSnapshots = await Promise.all(memberPromises);
+                
+                skillSnapshots.forEach((skillSnapshot) => {
+                    if (skillSnapshot.exists()) {
+                        const skills = skillSnapshot.val();
+                        const playerTotal = Object.values(skills).reduce((sum, level) => sum + (level || 0), 0);
+                        totalLevel += playerTotal;
+                    }
+                });
+            }
+            
+            document.getElementById('clanTotalLevel').textContent = totalLevel;
         }
 
         // Load clan members
@@ -3548,6 +3552,30 @@ const firebaseConfig = {
             document.getElementById('totalSpace').textContent = '0';
         }
 
+        // Initialize clan storage in the Storage tab
+        function initializeClanStorageTab() {
+            const storageGrid = document.getElementById('clanStorageGridTab');
+            storageGrid.innerHTML = '';
+            
+            // Create 8 storage slots (0/8 by default)
+            for (let i = 0; i < 8; i++) {
+                const slot = document.createElement('div');
+                slot.style.cssText = 'width: 60px; height: 60px; background: rgba(0,0,0,0.5); border: 2px solid #2a3a4a; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s;';
+                slot.innerHTML = '<div style="color: #4a5a6a; font-size: 24px;">🔒</div>';
+                slot.addEventListener('mouseenter', () => {
+                    slot.style.borderColor = '#4a6a8a';
+                });
+                slot.addEventListener('mouseleave', () => {
+                    slot.style.borderColor = '#2a3a4a';
+                });
+                storageGrid.appendChild(slot);
+            }
+            
+            document.getElementById('clanGoldTab').textContent = '0';
+            document.getElementById('purchasedSpaceTab').textContent = '0';
+            document.getElementById('totalSpaceTab').textContent = '0';
+        }
+
         // Close clan page
         document.getElementById('closeClanPage').addEventListener('click', () => {
             document.getElementById('clanPageModal').style.display = 'none';
@@ -3575,6 +3603,11 @@ const firebaseConfig = {
                     content.style.display = 'none';
                 });
                 document.getElementById(`tab-${tabName}`).style.display = 'block';
+                
+                // Initialize storage if storage tab is opened
+                if (tabName === 'storage') {
+                    initializeClanStorageTab();
+                }
             });
         });
 
