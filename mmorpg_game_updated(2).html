@@ -1,0 +1,3703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMORPG - Room Based</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e1a;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            user-select: none;
+            image-rendering: crisp-edges;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        #gameContainer {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 260px;
+            width: calc(100% - 260px);
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: left 0.3s, width 0.3s;
+        }
+        
+        #gameCanvas.expanded {
+            left: 20px;
+            width: calc(100% - 20px);
+        }
+
+        /* Left Sidebar Menu */
+        #leftSidebar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a2332 0%, #0f1620 100%);
+            border-right: 2px solid #2a3a4a;
+            z-index: 20;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: transform 0.3s;
+        }
+
+        #leftSidebar.collapsed {
+            transform: translateX(-240px);
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 60px;
+            background: linear-gradient(135deg, #1a2332 0%, #0f1620 100%);
+            border: 2px solid #2a3a4a;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a9a8a;
+            font-size: 18px;
+        }
+
+        .menu-section {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #2a3a4a;
+        }
+
+        .menu-header {
+            padding: 12px 20px;
+            color: #8a9aaa;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #cad2da;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            font-size: 15px;
+        }
+
+        .menu-item:hover {
+            background: rgba(74, 154, 138, 0.2);
+            color: #4a9a8a;
+            padding-left: 25px;
+        }
+
+        .menu-item.active {
+            background: rgba(74, 154, 138, 0.3);
+            color: #5abaaa;
+            border-left: 3px solid #5abaaa;
+        }
+
+        .menu-icon {
+            width: 28px;
+            height: 28px;
+            margin-right: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Skills Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3px;
+            padding: 0 12px 8px 12px;
+        }
+
+        .skill-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(20, 30, 40, 0.5);
+            border: 1px solid #2a3a4a;
+            border-radius: 3px;
+            padding: 3px 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .skill-item:hover {
+            background: rgba(74, 154, 138, 0.2);
+            border-color: #4a9a8a;
+            transform: scale(1.05);
+        }
+
+        .skill-icon {
+            font-size: 14px;
+            margin-right: 3px;
+        }
+
+        .skill-level {
+            color: #8a9aaa;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .total-level {
+            padding: 6px 12px;
+            color: #5abaaa;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            border-top: 1px solid #2a3a4a;
+        }
+
+        <!-- Top UI Bar -->
+        #topBar {
+            position: absolute;
+            top: 10px;
+            left: 270px;
+            right: 20px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(26, 35, 50, 0.95) 0%, rgba(15, 22, 32, 0.95) 100%);
+            border: 2px solid #2a3a4a;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 15;
+            transition: left 0.3s;
+        }
+
+        .resource-display {
+            display: flex;
+            align-items: center;
+            margin-right: 30px;
+            padding: 8px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .afk-toggle {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #2a5a4a, #1a4a3a);
+            color: #5abaaa;
+            border: 2px solid #3a6a5a;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+
+        .afk-toggle:hover {
+            background: linear-gradient(135deg, #3a6a5a, #2a5a4a);
+            transform: translateY(-1px);
+        }
+
+        .afk-toggle.active {
+            background: linear-gradient(135deg, #4a8a5a, #3a7a4a);
+            border-color: #5a9a6a;
+            color: #6afa6a;
+        }
+
+        .coin-icon {
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Inventory UI - Exact Match */
+        #inventoryUI {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a2936 0%, #0f1820 100%);
+            border: 3px solid #2a4a5a;
+            border-radius: 15px;
+            display: none;
+            z-index: 100;
+            width: 1400px;
+            max-width: 90vw;
+            height: 85vh;
+            max-height: 900px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            overflow: hidden;
+        }
+
+        .inv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 2px solid #2a4a5a;
+        }
+
+        .inv-header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .gold-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #2a3a30, #1a2a20);
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 2px solid #4a6a50;
+        }
+
+        .gold-display .coin-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .gold-amount {
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .space-display {
+            color: #8a9aaa;
+            font-size: 16px;
+        }
+
+        .inv-header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .inv-header-btn {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #2a5a5a, #1a4a4a);
+            color: #5abaaa;
+            border: 2px solid #3a6a6a;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .inv-header-btn:hover {
+            background: linear-gradient(135deg, #3a6a6a, #2a5a5a);
+            transform: translateY(-1px);
+        }
+
+        .lock-btn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #8a3a3a, #6a2a2a);
+            border: 2px solid #aa5a5a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .manage-btn {
+            background: linear-gradient(135deg, #2a5a4a, #1a4a3a);
+            border-color: #3a6a5a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-btn {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #8a3a3a, #6a2a2a);
+            border: 2px solid #aa5a5a;
+            border-radius: 50%;
+            color: #ff8a8a;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: linear-gradient(135deg, #9a4a4a, #7a3a3a);
+            transform: scale(1.1);
+        }
+
+        .inv-search-bar {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            background: rgba(10, 20, 30, 0.8);
+            border: 2px solid #2a4a5a;
+            border-radius: 8px;
+            color: #8a9aaa;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .search-input::placeholder {
+            color: #5a6a7a;
+        }
+
+        .search-btn {
+            padding: 10px 30px;
+            background: linear-gradient(135deg, #2a5a5a, #1a4a4a);
+            color: #5abaaa;
+            border: 2px solid #3a6a6a;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .inv-body {
+            display: flex;
+            padding: 25px;
+            gap: 20px;
+        }
+
+        .inv-main {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Inventory Grid */
+        .inv-grid-container {
+            flex: 1;
+            max-height: calc(85vh - 250px);
+            min-height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 10px;
+            position: relative;
+        }
+        
+        /* Fade indicator at bottom */
+        .inv-grid-container::after {
+            content: '';
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to bottom, transparent, rgba(26, 41, 54, 0.8));
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Custom scrollbar for inventory */
+        .inv-grid-container::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        .inv-grid-container::-webkit-scrollbar-track {
+            background: rgba(20, 30, 40, 0.5);
+            border-radius: 6px;
+        }
+        
+        .inv-grid-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3a5a6a, #2a4a5a);
+            border-radius: 6px;
+            border: 2px solid #2a3a4a;
+        }
+        
+        .inv-grid-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #4a6a7a, #3a5a6a);
+        }
+
+        .inv-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+        }
+
+        .inv-slot {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #2a4a5a, #1a3a4a);
+            border: 2px solid #3a5a6a;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .inv-slot:hover {
+            background: linear-gradient(135deg, #3a5a6a, #2a4a5a);
+            border-color: #4a6a7a;
+            transform: scale(1.05);
+        }
+
+        .inv-slot.empty {
+            background: linear-gradient(135deg, #1a3a4a, #0a2a3a);
+            border-color: #2a4a5a;
+        }
+
+        .inv-slot.occupied {
+            background: linear-gradient(135deg, #6a4a4a, #5a3a3a);
+            border-color: #8a5a5a;
+            position: relative;
+        }
+
+        .item-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 56px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-quantity {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #FFD700;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 4px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+        }
+
+        /* Category Icons */
+        .category-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 60px;
+        }
+
+        .cat-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #2a4a5a, #1a3a4a);
+            border: 2px solid #3a5a6a;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5abaaa;
+            font-size: 30px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .cat-icon:hover {
+            background: linear-gradient(135deg, #3a5a6a, #2a4a5a);
+            border-color: #4a6a7a;
+            transform: scale(1.1);
+        }
+
+        .cat-icon.active {
+            background: linear-gradient(135deg, #4a7a6a, #3a6a5a);
+            border-color: #5a8a7a;
+        }
+
+        .cat-icon.x-btn {
+            background: linear-gradient(135deg, #3a5a5a, #2a4a4a);
+        }
+
+        /* Equipment Panel */
+        .equipment-panel {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .equip-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        
+        .equip-slot-spacer {
+            /* Empty spacer for centered items */
+        }
+
+        .equip-slot {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #2a4a5a, #1a3a4a);
+            border: 2px solid #3a5a6a;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .equip-slot.empty {
+            background: linear-gradient(135deg, #1a2a3a, #0a1a2a);
+            border-color: #2a3a4a;
+            opacity: 0.6;
+        }
+
+        .equip-slot.equipped {
+            background: linear-gradient(135deg, #3a5a6a, #2a4a5a);
+            border-color: #4a7a8a;
+            opacity: 1;
+        }
+
+        .equip-slot.equipped::before {
+            opacity: 1;
+            color: #5abaaa;
+        }
+
+        .equip-slot.empty::after {
+            content: attr(data-slot);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #3a4a5a;
+            font-size: 10px;
+            text-transform: uppercase;
+            opacity: 0.5;
+        }
+
+        .equip-slot:hover {
+            background: linear-gradient(135deg, #3a5a6a, #2a4a5a);
+            border-color: #4a6a7a;
+            transform: scale(1.05);
+        }
+
+        .equip-slot::before {
+            content: attr(data-icon);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #3a5a6a;
+            font-size: 40px;
+        }
+
+        .equipment-bonuses {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #2a4a5a;
+        }
+
+        .bonus-header {
+            color: #8a9aaa;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .bonus-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #5a7a8a;
+            font-size: 13px;
+        }
+
+        .bonus-icon {
+            font-size: 16px;
+        }
+
+        /* Tooltip styles */
+        .tooltip {
+            position: absolute;
+            background: linear-gradient(135deg, #2a3a4a, #1a2a3a);
+            border: 2px solid #4a6a7a;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+        }
+
+        .tooltip.show {
+            display: block;
+        }
+
+        .tooltip-empty {
+            color: #8a9aaa;
+        }
+
+        .tooltip-item {
+            color: #5abaaa;
+        }
+
+        /* Login Modal */
+        #loginModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .login-container {
+            background: linear-gradient(135deg, #1a2332 0%, #0f1620 100%);
+            border: 3px solid #2a3a4a;
+            border-radius: 15px;
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        .login-title {
+            color: #5abaaa;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .google-login-btn {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            color: #444;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .google-login-btn:hover {
+            background: #f5f5f5;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .guest-login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #3a5a6a, #2a4a5a);
+            color: #8a9aaa;
+            border: 2px solid #4a6a7a;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .guest-login-btn:hover {
+            background: linear-gradient(135deg, #4a6a7a, #3a5a6a);
+            border-color: #5a7a8a;
+            color: #9aaaba;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .guest-warning {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 150, 50, 0.1);
+            border: 2px solid rgba(255, 150, 50, 0.3);
+            border-radius: 8px;
+            color: #ffaa66;
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            margin-left: auto;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #5abaaa;
+        }
+
+        .user-name {
+            color: #5abaaa;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            padding: 6px 12px;
+            background: rgba(255, 50, 50, 0.2);
+            color: #ff6666;
+            border: 1px solid #ff4444;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 50, 50, 0.4);
+        }
+
+        /* Player Market Modal */
+        #marketModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1200px;
+            height: 80vh;
+            background: linear-gradient(135deg, #1a2936 0%, #0f1824 100%);
+            border: 3px solid #2a4a5a;
+            border-radius: 15px;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .market-header {
+            padding: 20px;
+            border-bottom: 2px solid #2a4a5a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .market-title {
+            color: #5abaaa;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .market-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            border-bottom: 2px solid #2a4a5a;
+        }
+
+        .market-tab {
+            padding: 10px 20px;
+            background: rgba(42, 74, 90, 0.3);
+            color: #8a9aaa;
+            border: 2px solid #2a4a5a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .market-tab:hover {
+            background: rgba(74, 154, 138, 0.2);
+            border-color: #4a9a8a;
+        }
+
+        .market-tab.active {
+            background: linear-gradient(135deg, #4a7a6a, #3a6a5a);
+            color: #5abaaa;
+            border-color: #5a8a7a;
+        }
+
+        .market-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .market-listings {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .market-listing {
+            background: linear-gradient(135deg, #2a3a4a, #1a2a3a);
+            border: 2px solid #3a5a6a;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .market-listing:hover {
+            border-color: #5abaaa;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(90, 186, 170, 0.3);
+        }
+
+        .listing-item-name {
+            color: #5abaaa;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .listing-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .listing-price {
+            color: #FFD700;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .listing-quantity {
+            color: #8a9aaa;
+            font-size: 14px;
+        }
+
+        .listing-seller {
+            color: #6a8a9a;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .buy-btn, .sell-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #4a7a6a, #3a6a5a);
+            color: #5abaaa;
+            border: 2px solid #5a8a7a;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .buy-btn:hover, .sell-btn:hover {
+            background: linear-gradient(135deg, #5a8a7a, #4a7a6a);
+            transform: translateY(-2px);
+        }
+
+        .sell-item-section {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #2a4a5a;
+            margin-bottom: 20px;
+        }
+
+        .sell-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            color: #8a9aaa;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .form-input {
+            padding: 10px;
+            background: rgba(26, 42, 54, 0.8);
+            border: 2px solid #2a4a5a;
+            border-radius: 6px;
+            color: #cad2da;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #5abaaa;
+        }
+
+        .inventory-select-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .selectable-item {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #2a4a5a, #1a3a4a);
+            border: 2px solid #3a5a6a;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .selectable-item:hover {
+            border-color: #5abaaa;
+            transform: scale(1.05);
+        }
+
+        .selectable-item.selected {
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Left Sidebar -->
+        <div id="leftSidebar">
+            <div class="sidebar-toggle">⟩</div>
+            
+            <div class="menu-section">
+                <div class="menu-header">Account</div>
+                <div class="menu-item">
+                    <span class="menu-icon">🏠</span>
+                    <span>Profile</span>
+                </div>
+                <div class="menu-item active">
+                    <span class="menu-icon">🎒</span>
+                    <span>Inventory</span>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-header">Community</div>
+                <div class="menu-item">
+                    <span class="menu-icon">🛡️</span>
+                    <span>Clan</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-icon">💱</span>
+                    <span>Player market</span>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-header">Activities ⇄</div>
+                <div class="menu-item" data-room="raids">
+                    <span class="menu-icon">🏰</span>
+                    <span>Raids</span>
+                </div>
+                <div class="menu-item" data-room="combat">
+                    <span class="menu-icon">⚔️</span>
+                    <span>Combat</span>
+                </div>
+
+                <div class="menu-item" data-room="crafting">
+                    <span class="menu-icon">🔨</span>
+                    <span>Crafting</span>
+                </div>
+
+                <div class="menu-item" data-room="woodcutting">
+                    <span class="menu-icon">🪓</span>
+                    <span>Woodcutting</span>
+                </div>
+                <div class="menu-item" data-room="fishing">
+                    <span class="menu-icon">🎣</span>
+                    <span>Fishing</span>
+                </div>
+                <div class="menu-item" data-room="mining">
+                    <span class="menu-icon">⛏️</span>
+                    <span>Mining</span>
+                </div>
+                <div class="menu-item" data-room="cooking">
+                    <span class="menu-icon">🍳</span>
+                    <span>Cooking</span>
+                </div>
+                <div class="menu-item" data-room="farming">
+                    <span class="menu-icon">🌱</span>
+                    <span>Farming</span>
+                </div>
+                <div class="menu-item" data-room="agility">
+                    <span class="menu-icon">🏃</span>
+                    <span>Agility</span>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-header">Skills</div>
+                <div class="skills-grid">
+                    <div class="skill-item" title="Hitpoints">
+                        <span class="skill-icon">❤️</span>
+                        <span class="skill-level">10</span>
+                    </div>
+                    <div class="skill-item" title="Attack">
+                        <span class="skill-icon">⚔️</span>
+                        <span class="skill-level">1</span>
+                    </div>
+                    <div class="skill-item" title="Mining">
+                        <span class="skill-icon">⛏️</span>
+                        <span class="skill-level">1</span>
+                    </div>
+                    <div class="skill-item" title="Strength">
+                        <span class="skill-icon">💪</span>
+                        <span class="skill-level">1</span>
+                    </div>
+                    <div class="skill-item" title="Agility">
+                        <span class="skill-icon">🏃</span>
+                        <span class="skill-level">1</span>
+                    </div>
+
+                    <div class="skill-item" title="Defence">
+                        <span class="skill-icon">🛡️</span>
+                        <span class="skill-level">1</span>
+                    </div>
+
+                    <div class="skill-item" title="Fishing">
+                        <span class="skill-icon">🎣</span>
+                        <span class="skill-level">1</span>
+                    </div>
+                    <div class="skill-item" title="Ranged">
+                        <span class="skill-icon">🏹</span>
+                        <span class="skill-level">1</span>
+                    </div>
+
+                    <div class="skill-item" title="Cooking">
+                        <span class="skill-icon">🍳</span>
+                        <span class="skill-level">1</span>
+                    </div>
+
+                    <div class="skill-item" title="Crafting">
+                        <span class="skill-icon">🧵</span>
+                        <span class="skill-level">1</span>
+                    </div>
+
+                    <div class="skill-item" title="Magic">
+                        <span class="skill-icon">✨</span>
+                        <span class="skill-level">1</span>
+                    </div>
+
+                    <div class="skill-item" title="Woodcutting">
+                        <span class="skill-icon">🪓</span>
+                        <span class="skill-level">1</span>
+                    </div>
+
+
+                    <div class="skill-item" title="Farming">
+                        <span class="skill-icon">🌱</span>
+                        <span class="skill-level">1</span>
+                    </div>
+
+
+                    <div class="skill-item" title="Combat">
+                        <span class="skill-icon">⚔️</span>
+                        <span class="skill-level">3</span>
+                    </div>
+                </div>
+                <div class="total-level">Total: <span id="totalLevel">33</span></div>
+            </div>
+        </div>
+
+        <!-- Top Bar -->
+        <div id="topBar">
+            <div class="resource-display">
+                <div class="coin-icon"></div>
+                <span style="color: #FFD700; font-weight: bold; font-size: 18px;" id="goldAmount">100,965</span>
+            </div>
+            <div class="resource-display" style="background: rgba(74, 154, 138, 0.2); border: 1px solid #4a9a8a;">
+                <span style="color: #5abaaa;" id="currentRoom">Woodcutting Area</span>
+            </div>
+            <button class="afk-toggle active" id="afkToggle">AFK Mode</button>
+        </div>
+
+        <!-- Inventory UI -->
+        <div id="inventoryUI">
+            
+            <div class="inv-header">
+                <div class="inv-header-left">
+                    <div class="gold-display">
+                        <div class="coin-icon"></div>
+                        <span class="gold-amount" id="invGold">100,965</span>
+                    </div>
+                    <div class="space-display">
+                        Space: <span id="invSpace">38</span>/98
+                    </div>
+                </div>
+                <div class="inv-header-right">
+                    <div class="lock-btn">🔒</div>
+                    <button class="inv-header-btn" id="sortBtn">Sort</button>
+                    <button class="inv-header-btn manage-btn">
+                        <span>⚙️</span>
+                        <span>Manage</span>
+                    </button>
+                    <button class="close-btn" id="closeInventory">✖</button>
+                </div>
+            </div>
+            
+            <div class="inv-search-bar">
+                <input type="text" class="search-input" placeholder="Search for an item...">
+                <button class="search-btn">Search</button>
+                <button class="search-btn">Reset</button>
+            </div>
+
+            <div class="inv-body">
+                <div class="inv-main">
+                    <div class="inv-grid-container">
+                        <div class="inv-grid" id="inventoryGrid"></div>
+                    </div>
+                    
+                    <div class="category-bar">
+                        <div class="cat-icon x-btn" title="Clear all">✖</div>
+                        <div class="cat-icon" title="Armor">👔</div>
+                        <div class="cat-icon" title="Weapons">⚔️</div>
+                        <div class="cat-icon" title="Tools">🔨</div>
+                        <div class="cat-icon" title="Materials">📦</div>
+                        <div class="cat-icon" title="Fish">🐟</div>
+                        <div class="cat-icon" title="Food">🍖</div>
+                        <div class="cat-icon" title="Potions">🧪</div>
+                    </div>
+                </div>
+
+                <div class="equipment-panel">
+                    <div class="equip-grid">
+                        <!-- Row 1: Head (centered) -->
+                        <div class="equip-slot-spacer"></div>
+                        <div class="equip-slot empty" data-slot="Head" data-icon=""></div>
+                        <div class="equip-slot-spacer"></div>
+                        
+                        <!-- Row 2: Cape, Amulet, Arrows -->
+                        <div class="equip-slot empty" data-slot="Cape" data-icon=""></div>
+                        <div class="equip-slot empty" data-slot="Amulet" data-icon=""></div>
+                        <div class="equip-slot empty" data-slot="Arrows" data-icon=""></div>
+                        
+                        <!-- Row 3: Weapon, Chest, Off Hand -->
+                        <div class="equip-slot empty" data-slot="Weapon" data-icon=""></div>
+                        <div class="equip-slot empty" data-slot="Chest" data-icon=""></div>
+                        <div class="equip-slot empty" data-slot="Off-Hand" data-icon=""></div>
+                        
+                        <!-- Row 4: Gloves, Pants, Ring -->
+                        <div class="equip-slot empty" data-slot="Gloves" data-icon=""></div>
+                        <div class="equip-slot empty" data-slot="Legs" data-icon=""></div>
+                        <div class="equip-slot empty" data-slot="Ring" data-icon=""></div>
+                        
+                        <!-- Row 5: Boots (centered) -->
+                        <div class="equip-slot-spacer"></div>
+                        <div class="equip-slot empty" data-slot="Boots" data-icon=""></div>
+                        <div class="equip-slot-spacer"></div>
+                    </div>
+
+                    <div class="equipment-bonuses">
+                        <div class="bonus-header">EQUIPMENT BONUSES</div>
+                        <div class="bonus-stat">
+                            <span class="bonus-icon">⚔️</span>
+                            <span style="font-size: 12px;">Str: 0 | Acc: 0 | Def: 0</span>
+                        </div>
+                        <div class="bonus-stat">
+                            <span class="bonus-icon">🏹</span>
+                            <span style="font-size: 12px;">Str: 0 | Acc: 0 | Def: 0</span>
+                        </div>
+                        <div class="bonus-stat">
+                            <span class="bonus-icon">🔮</span>
+                            <span style="font-size: 12px;">Str: 0 | Acc: 0 | Def: 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal">
+        <div class="login-container">
+            <div class="login-title">🎮 MMORPG Login</div>
+            <button class="google-login-btn" id="googleLoginBtn">
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"/>
+                    <path fill="#34A853" d="M13.46 15.13c-.83.59-1.96 1-3.46 1-2.64 0-4.88-1.74-5.68-4.15H1.07v2.52C2.72 17.75 6.09 20 10 20c2.7 0 4.96-.89 6.62-2.42l-3.16-2.45z"/>
+                    <path fill="#FBBC05" d="M3.99 10c0-.69.12-1.35.32-1.97V5.51H1.07A9.973 9.973 0 000 10c0 1.61.39 3.14 1.07 4.49l3.24-2.52c-.2-.62-.32-1.28-.32-1.97z"/>
+                    <path fill="#EA4335" d="M10 3.88c1.88 0 3.13.81 3.85 1.48l2.84-2.76C14.96.99 12.7 0 10 0 6.09 0 2.72 2.25 1.07 5.51l3.24 2.52C5.12 5.62 7.36 3.88 10 3.88z"/>
+                </svg>
+                Sign in with Google
+            </button>
+            
+            <div style="margin: 20px 0; color: #6a8a9a; font-size: 14px;">- OR -</div>
+            
+            <button class="guest-login-btn" id="guestLoginBtn">
+                👤 Play as Guest
+            </button>
+            
+            <div class="guest-warning">
+                ⚠️ Guest mode: Your progress won't be saved and you can't access the player market
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Market Modal -->
+    <div id="marketModal">
+        <div class="market-header">
+            <div class="market-title">💱 Player Market</div>
+            <button class="close-btn" id="closeMarket">✖</button>
+        </div>
+
+        <div class="market-tabs">
+            <div class="market-tab active" data-tab="browse">Browse Listings</div>
+            <div class="market-tab" data-tab="sell">Sell Items</div>
+            <div class="market-tab" data-tab="mylistings">My Listings</div>
+        </div>
+
+        <div class="market-content">
+            <!-- Browse Tab -->
+            <div class="market-tab-content" id="browseTab">
+                <div class="inv-search-bar" style="margin-bottom: 20px;">
+                    <input type="text" class="search-input" id="marketSearch" placeholder="Search items...">
+                    <button class="search-btn" id="searchMarketBtn">Search</button>
+                </div>
+                <div class="market-listings" id="marketListings">
+                    <!-- Listings will be populated here -->
+                </div>
+            </div>
+
+            <!-- Sell Tab -->
+            <div class="market-tab-content" id="sellTab" style="display: none;">
+                <div class="sell-item-section">
+                    <h3 style="color: #5abaaa; margin-bottom: 15px;">Create New Listing</h3>
+                    <div class="sell-form">
+                        <div class="form-group">
+                            <label class="form-label">Select Item from Inventory:</label>
+                            <div class="inventory-select-grid" id="sellInventoryGrid">
+                                <!-- Inventory items will be populated here -->
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price (Gold):</label>
+                            <input type="number" class="form-input" id="sellPrice" placeholder="Enter price in gold" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Quantity:</label>
+                            <input type="number" class="form-input" id="sellQuantity" placeholder="How many to sell" min="1" value="1">
+                        </div>
+                        <button class="sell-btn" id="createListingBtn">Create Listing</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Listings Tab -->
+            <div class="market-tab-content" id="myListingsTab" style="display: none;">
+                <div class="market-listings" id="myListingsGrid">
+                    <!-- User's listings will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        function resizeCanvas() {
+            const oldWidth = canvas.width;
+            const oldHeight = canvas.height;
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // If size changed, regenerate tiles and force redraw (only if game is initialized)
+            if (oldWidth !== canvas.width || oldHeight !== canvas.height) {
+                try {
+                    // Only regenerate if game objects are initialized
+                    if (typeof generateTiles === 'function') {
+                        generateTiles();
+                    }
+                    
+                    // Adjust player position if needed to stay in bounds
+                    if (gameState && gameState.player) {
+                        gameState.player.x = Math.min(gameState.player.x, canvas.width - 50);
+                        gameState.player.y = Math.min(gameState.player.y, canvas.height - 50);
+                    }
+                } catch (e) {
+                    // Ignore errors during initialization
+                }
+            }
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Game State
+        const gameState = {
+            currentRoom: 'woodcutting',
+            player: {
+                x: 400,
+                y: 300,
+                targetX: null,
+                targetY: null,
+                speed: 4,
+                size: 20,
+                gold: 100965,
+                inventory: [],
+                inventorySize: 98,
+                equipment: {
+                    head: null,
+                    amulet: null,
+                    cape: null,
+                    chest: null,
+                    legs: null,
+                    boots: null,
+                    gloves: null,
+                    ring: null,
+                    weapon: null,
+                    'off-hand': null,
+                    arrows: null
+                },
+                isPerformingAction: false,
+                actionProgress: 0,
+                actionDuration: 3000, // 3 seconds per action
+                currentTarget: null,
+                lastActionTime: 0,
+                skills: {
+                    hitpoints: 10,
+                    attack: 1,
+                    mining: 1,
+                    strength: 1,
+                    agility: 1,
+
+                    defence: 1,
+
+                    fishing: 1,
+                    ranged: 1,
+
+                    cooking: 1,
+
+                    crafting: 1,
+
+                    magic: 1,
+
+                    woodcutting: 1,
+
+
+                    farming: 1,
+
+
+                    combat: 1
+                }
+            },
+            camera: {
+                x: 0,
+                y: 0
+            },
+            tiles: [],
+            objects: [],
+            particles: [],
+            inventoryOpen: false,
+            afkMode: true,
+            nextTargetTime: 0,
+            sprites: {}
+        };
+
+        // Firebase Configuration - Replace with your Firebase project credentials
+const firebaseConfig = {
+    apiKey: "AIzaSyC5Rx39EtpX9wv7sr-xSGG4VErBzehBQek",
+    authDomain: "mmorpg-game-7c7c2.firebaseapp.com",
+    databaseURL: "https://mmorpg-game-7c7c2-default-rtdb.firebaseio.com",
+    projectId: "mmorpg-game-7c7c2",
+    storageBucket: "mmorpg-game-7c7c2.firebasestorage.app",
+    messagingSenderId: "98410356329",
+    appId: "1:98410356329:web:aed8990095ec1eb5f0c78"
+};
+
+        // Check if Firebase config is set up (not using placeholder values)
+        const isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY" && 
+                                      firebaseConfig.projectId !== "YOUR_PROJECT_ID";
+
+        // Initialize Firebase only if configured
+        let auth = null;
+        let database = null;
+        
+        if (isFirebaseConfigured) {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                database = firebase.database();
+                console.log('Firebase initialized successfully');
+            } catch (error) {
+                console.error('Firebase initialization error:', error);
+                console.log('Guest mode will work, but sign-in features disabled');
+            }
+        } else {
+            console.log('Firebase not configured - Guest mode available, sign-in disabled');
+        }
+
+        // Auth state management
+        let currentUser = null;
+        let isGuestMode = false;
+
+        // Google Sign In
+        document.getElementById('googleLoginBtn').addEventListener('click', () => {
+            if (!isFirebaseConfigured || !auth) {
+                showFloatingText('Firebase not configured. Please set up Firebase to use sign-in.', canvas.width / 2, 100, '#ff4444');
+                showFloatingText('You can still play as guest!', canvas.width / 2, 140, '#ffaa66');
+                return;
+            }
+            
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    currentUser = result.user;
+                    isGuestMode = false;
+                    document.getElementById('loginModal').style.display = 'none';
+                    updateUserUI();
+                    showFloatingText('Welcome ' + currentUser.displayName + '!', canvas.width / 2, 100, '#FFD700');
+                })
+                .catch((error) => {
+                    console.error('Login error:', error);
+                    showFloatingText('Login failed: ' + error.message, canvas.width / 2, 100, '#ff4444');
+                });
+        });
+
+        // Guest Login
+        document.getElementById('guestLoginBtn').addEventListener('click', () => {
+            isGuestMode = true;
+            currentUser = null;
+            document.getElementById('loginModal').style.display = 'none';
+            updateUserUI();
+            showFloatingText('Playing as Guest - Progress will not be saved', canvas.width / 2, 100, '#ffaa66');
+            
+            // Show reminder after a few seconds
+            setTimeout(() => {
+                showFloatingText('Tip: Sign in with Google to save progress and use the market', canvas.width / 2, 150, '#6a8a9a');
+            }, 3000);
+        });
+
+        // Check auth state on load - only if Firebase is configured
+        if (isFirebaseConfigured && auth) {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    isGuestMode = false;
+                    document.getElementById('loginModal').style.display = 'none';
+                    updateUserUI();
+                } else if (!isGuestMode) {
+                    currentUser = null;
+                    document.getElementById('loginModal').style.display = 'flex';
+                }
+            });
+        } else {
+            // Firebase not configured - show login modal (guest mode available)
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        // Update user UI in top bar
+        function updateUserUI() {
+            const topBar = document.getElementById('topBar');
+            // Remove old user info if exists
+            const oldInfo = document.querySelector('.user-info');
+            if (oldInfo) oldInfo.remove();
+            
+            if (currentUser && auth) {
+                // Logged in with Google
+                const userInfo = document.createElement('div');
+                userInfo.className = 'user-info';
+                userInfo.innerHTML = `
+                    <img src="${currentUser.photoURL}" class="user-avatar" alt="Avatar">
+                    <span class="user-name">${currentUser.displayName}</span>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                `;
+                topBar.appendChild(userInfo);
+                
+                // Logout handler
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    if (auth) {
+                        auth.signOut();
+                        showFloatingText('Logged out', canvas.width / 2, 100, '#8a9aaa');
+                    }
+                });
+            } else if (isGuestMode) {
+                // Playing as guest
+                const userInfo = document.createElement('div');
+                userInfo.className = 'user-info';
+                
+                if (isFirebaseConfigured) {
+                    // Firebase is set up, show login option
+                    userInfo.innerHTML = `
+                        <span class="user-name" style="color: #8a9aaa;">👤 Guest Mode</span>
+                        <button class="logout-btn" id="loginBtn" style="background: linear-gradient(135deg, #4a7a6a, #3a6a5a); color: #5abaaa; border-color: #5a8a7a;">Login</button>
+                    `;
+                } else {
+                    // Firebase not configured, can't login
+                    userInfo.innerHTML = `
+                        <span class="user-name" style="color: #8a9aaa;">👤 Guest Mode</span>
+                        <span style="color: #6a8a9a; font-size: 11px; margin-left: 10px;">(Login requires Firebase setup)</span>
+                    `;
+                }
+                
+                topBar.appendChild(userInfo);
+                
+                // Login button handler (only if Firebase configured)
+                const loginBtn = document.getElementById('loginBtn');
+                if (loginBtn) {
+                    loginBtn.addEventListener('click', () => {
+                        isGuestMode = false;
+                        document.getElementById('loginModal').style.display = 'flex';
+                    });
+                }
+            }
+        }
+
+        // Player Market Functions
+        let marketRef = null;
+        if (database) {
+            marketRef = database.ref('market/listings');
+        }
+        let selectedItemForSale = null;
+
+        // Open market - find the correct menu item
+        document.querySelectorAll('.menu-item').forEach(item => {
+            const text = item.textContent || item.innerText;
+            if (text.includes('Player market')) {
+                item.addEventListener('click', () => {
+                    if (!isFirebaseConfigured) {
+                        showFloatingText('Player market requires Firebase setup', canvas.width / 2, 100, '#ffaa66');
+                        showFloatingText('You can play as guest without Firebase!', canvas.width / 2, 140, '#8a9aaa');
+                        return;
+                    }
+                    if (isGuestMode) {
+                        showFloatingText('Please sign in with Google to access the market', canvas.width / 2, 100, '#ffaa66');
+                        showFloatingText('Guest mode does not support market features', canvas.width / 2, 140, '#8a9aaa');
+                        return;
+                    }
+                    if (!currentUser) {
+                        showFloatingText('Please login to access the market', canvas.width / 2, 100, '#ff4444');
+                        return;
+                    }
+                    document.getElementById('marketModal').style.display = 'flex';
+                    loadMarketListings();
+                });
+            }
+        });
+
+        // Close market
+        document.getElementById('closeMarket').addEventListener('click', () => {
+            document.getElementById('marketModal').style.display = 'none';
+        });
+
+        // Market tab switching
+        document.querySelectorAll('.market-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active from all tabs
+                document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Hide all content
+                document.querySelectorAll('.market-tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Show selected content
+                const tabName = tab.dataset.tab;
+                if (tabName === 'browse') {
+                    document.getElementById('browseTab').style.display = 'block';
+                    loadMarketListings();
+                } else if (tabName === 'sell') {
+                    document.getElementById('sellTab').style.display = 'block';
+                    populateSellInventory();
+                } else if (tabName === 'mylistings') {
+                    document.getElementById('myListingsTab').style.display = 'block';
+                    loadMyListings();
+                }
+            });
+        });
+
+        // Populate sell inventory
+        function populateSellInventory() {
+            const grid = document.getElementById('sellInventoryGrid');
+            grid.innerHTML = '';
+            
+            gameState.player.inventory.forEach((item, index) => {
+                if (item && item.quantity > 0) {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'selectable-item';
+                    itemDiv.innerHTML = item.icon || '📦';
+                    itemDiv.title = `${item.name} (${item.quantity})`;
+                    
+                    itemDiv.addEventListener('click', () => {
+                        // Remove selection from all
+                        document.querySelectorAll('.selectable-item').forEach(i => i.classList.remove('selected'));
+                        itemDiv.classList.add('selected');
+                        selectedItemForSale = { ...item, inventoryIndex: index };
+                        document.getElementById('sellQuantity').max = item.quantity;
+                    });
+                    
+                    grid.appendChild(itemDiv);
+                }
+            });
+        }
+
+        // Create listing
+        document.getElementById('createListingBtn').addEventListener('click', () => {
+            if (!marketRef) {
+                showFloatingText('Market requires Firebase setup', canvas.width / 2, 100, '#ff4444');
+                return;
+            }
+            
+            if (!currentUser) {
+                showFloatingText('Please login first', canvas.width / 2, 100, '#ff4444');
+                return;
+            }
+            
+            if (!selectedItemForSale) {
+                showFloatingText('Please select an item', canvas.width / 2, 100, '#ff4444');
+                return;
+            }
+            
+            const price = parseInt(document.getElementById('sellPrice').value);
+            const quantity = parseInt(document.getElementById('sellQuantity').value);
+            
+            if (!price || price <= 0) {
+                showFloatingText('Please enter a valid price', canvas.width / 2, 100, '#ff4444');
+                return;
+            }
+            
+            if (!quantity || quantity <= 0 || quantity > selectedItemForSale.quantity) {
+                showFloatingText('Invalid quantity', canvas.width / 2, 100, '#ff4444');
+                return;
+            }
+            
+            // Create listing in Firebase
+            const listing = {
+                itemName: selectedItemForSale.name,
+                itemIcon: selectedItemForSale.icon,
+                tier: selectedItemForSale.tier || 1,
+                rarity: selectedItemForSale.rarity || 'common',
+                price: price,
+                quantity: quantity,
+                seller: currentUser.displayName,
+                sellerId: currentUser.uid,
+                timestamp: Date.now()
+            };
+            
+            marketRef.push(listing)
+                .then(() => {
+                    // Remove items from inventory
+                    gameState.player.inventory[selectedItemForSale.inventoryIndex].quantity -= quantity;
+                    if (gameState.player.inventory[selectedItemForSale.inventoryIndex].quantity <= 0) {
+                        gameState.player.inventory[selectedItemForSale.inventoryIndex] = null;
+                    }
+                    updateInventoryDisplay();
+                    
+                    showFloatingText('Listing created!', canvas.width / 2, 100, '#5abaaa');
+                    document.getElementById('sellPrice').value = '';
+                    document.getElementById('sellQuantity').value = '1';
+                    selectedItemForSale = null;
+                    populateSellInventory();
+                })
+                .catch(error => {
+                    console.error('Error creating listing:', error);
+                    showFloatingText('Failed to create listing', canvas.width / 2, 100, '#ff4444');
+                });
+        });
+
+        // Load market listings
+        function loadMarketListings(searchTerm = '') {
+            if (!marketRef) {
+                const listingsContainer = document.getElementById('marketListings');
+                listingsContainer.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Market requires Firebase setup</div>';
+                return;
+            }
+            
+            const listingsContainer = document.getElementById('marketListings');
+            listingsContainer.innerHTML = '<div style="color: #8a9aaa; text-align: center; padding: 20px;">Loading...</div>';
+            
+            marketRef.once('value')
+                .then(snapshot => {
+                    listingsContainer.innerHTML = '';
+                    const listings = [];
+                    
+                    snapshot.forEach(childSnapshot => {
+                        const listing = childSnapshot.val();
+                        listing.id = childSnapshot.key;
+                        
+                        // Filter by search term
+                        if (!searchTerm || listing.itemName.toLowerCase().includes(searchTerm.toLowerCase())) {
+                            listings.push(listing);
+                        }
+                    });
+                    
+                    if (listings.length === 0) {
+                        listingsContainer.innerHTML = '<div style="color: #8a9aaa; text-align: center; padding: 20px;">No listings found</div>';
+                        return;
+                    }
+                    
+                    listings.forEach(listing => {
+                        const listingDiv = document.createElement('div');
+                        listingDiv.className = 'market-listing';
+                        
+                        const rarityColors = {
+                            common: '#8a9aaa',
+                            uncommon: '#5abaaa',
+                            rare: '#4a8aff',
+                            epic: '#aa5aff',
+                            perfect: '#ff5aaa',
+                            legendary: '#ffaa5a'
+                        };
+                        
+                        listingDiv.innerHTML = `
+                            <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">
+                                ${listing.itemIcon || '📦'}
+                            </div>
+                            <div class="listing-item-name" style="color: ${rarityColors[listing.rarity] || '#8a9aaa'}">
+                                ${listing.itemName} ${listing.tier ? `(T${listing.tier})` : ''}
+                            </div>
+                            <div class="listing-details">
+                                <div class="listing-price">💰 ${listing.price}g</div>
+                                <div class="listing-quantity">Qty: ${listing.quantity}</div>
+                            </div>
+                            <div class="listing-seller">Seller: ${listing.seller}</div>
+                            ${listing.sellerId !== currentUser?.uid ? 
+                                '<button class="buy-btn" style="margin-top: 10px; width: 100%;">Buy Now</button>' : 
+                                '<div style="color: #8a9aaa; margin-top: 10px; text-align: center; font-size: 12px;">Your Listing</div>'}
+                        `;
+                        
+                        if (listing.sellerId !== currentUser?.uid) {
+                            listingDiv.querySelector('.buy-btn').addEventListener('click', () => {
+                                buyListing(listing);
+                            });
+                        }
+                        
+                        listingsContainer.appendChild(listingDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading listings:', error);
+                    listingsContainer.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Error loading listings</div>';
+                });
+        }
+
+        // Buy listing
+        function buyListing(listing) {
+            if (!marketRef) {
+                showFloatingText('Market requires Firebase setup', canvas.width / 2, 100, '#ff4444');
+                return;
+            }
+            
+            if (gameState.player.gold < listing.price) {
+                showFloatingText('Not enough gold!', canvas.width / 2, 100, '#ff4444');
+                return;
+            }
+            
+            // Deduct gold
+            gameState.player.gold -= listing.price;
+            
+            // Add item to inventory
+            addItemToInventory({
+                name: listing.itemName,
+                icon: listing.itemIcon,
+                tier: listing.tier,
+                rarity: listing.rarity,
+                quantity: listing.quantity
+            });
+            
+            // Remove listing from Firebase
+            marketRef.child(listing.id).remove()
+                .then(() => {
+                    // Add gold to seller (would need a more complete system)
+                    showFloatingText(`Purchased ${listing.itemName}!`, canvas.width / 2, 100, '#5abaaa');
+                    loadMarketListings();
+                })
+                .catch(error => {
+                    console.error('Error completing purchase:', error);
+                    showFloatingText('Purchase failed', canvas.width / 2, 100, '#ff4444');
+                });
+        }
+
+        // Load my listings
+        function loadMyListings() {
+            if (!currentUser) return;
+            
+            if (!marketRef) {
+                const listingsContainer = document.getElementById('myListingsGrid');
+                listingsContainer.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Market requires Firebase setup</div>';
+                return;
+            }
+            
+            const listingsContainer = document.getElementById('myListingsGrid');
+            listingsContainer.innerHTML = '<div style="color: #8a9aaa; text-align: center; padding: 20px;">Loading...</div>';
+            
+            marketRef.orderByChild('sellerId').equalTo(currentUser.uid).once('value')
+                .then(snapshot => {
+                    listingsContainer.innerHTML = '';
+                    
+                    if (!snapshot.exists()) {
+                        listingsContainer.innerHTML = '<div style="color: #8a9aaa; text-align: center; padding: 20px;">You have no active listings</div>';
+                        return;
+                    }
+                    
+                    snapshot.forEach(childSnapshot => {
+                        const listing = childSnapshot.val();
+                        listing.id = childSnapshot.key;
+                        
+                        const listingDiv = document.createElement('div');
+                        listingDiv.className = 'market-listing';
+                        
+                        listingDiv.innerHTML = `
+                            <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">
+                                ${listing.itemIcon || '📦'}
+                            </div>
+                            <div class="listing-item-name">
+                                ${listing.itemName} ${listing.tier ? `(T${listing.tier})` : ''}
+                            </div>
+                            <div class="listing-details">
+                                <div class="listing-price">💰 ${listing.price}g</div>
+                                <div class="listing-quantity">Qty: ${listing.quantity}</div>
+                            </div>
+                            <button class="buy-btn" style="margin-top: 10px; width: 100%; background: linear-gradient(135deg, #8a4a4a, #6a3a3a);">Cancel Listing</button>
+                        `;
+                        
+                        listingDiv.querySelector('.buy-btn').addEventListener('click', () => {
+                            marketRef.child(listing.id).remove()
+                                .then(() => {
+                                    // Return items to inventory
+                                    addItemToInventory({
+                                        name: listing.itemName,
+                                        icon: listing.itemIcon,
+                                        tier: listing.tier,
+                                        rarity: listing.rarity,
+                                        quantity: listing.quantity
+                                    });
+                                    showFloatingText('Listing cancelled', canvas.width / 2, 100, '#8a9aaa');
+                                    loadMyListings();
+                                })
+                                .catch(error => {
+                                    console.error('Error cancelling listing:', error);
+                                    showFloatingText('Failed to cancel', canvas.width / 2, 100, '#ff4444');
+                                });
+                        });
+                        
+                        listingsContainer.appendChild(listingDiv);
+                    });
+                });
+        }
+
+        // Search market
+        document.getElementById('searchMarketBtn').addEventListener('click', () => {
+            const searchTerm = document.getElementById('marketSearch').value;
+            loadMarketListings(searchTerm);
+        });
+
+        document.getElementById('marketSearch').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const searchTerm = document.getElementById('marketSearch').value;
+                loadMarketListings(searchTerm);
+            }
+        });
+
+        // Load sprites
+        const spriteUrls = {
+            log: 'https://raw.githubusercontent.com/Graphic37/RPG/main/Log%20T1%20Common.png',
+            ore: 'https://raw.githubusercontent.com/Graphic37/RPG/main/Mining/ore.png', // Common ore
+            ore_uncommon_t1: 'https://raw.githubusercontent.com/Graphic37/RPG/main/Mining/uncommon%20t1%20ore.png',
+            ore_rare_t1: 'https://raw.githubusercontent.com/Graphic37/RPG/main/Mining/rare%20tier%201.png',
+            ore_epic_t1: 'https://raw.githubusercontent.com/Graphic37/RPG/main/Mining/epic%20tier%201.png',
+            ore_perfect_t1: 'https://raw.githubusercontent.com/Graphic37/RPG/main/Mining/perfect%20tier%201.png',
+            fish: 'https://raw.githubusercontent.com/Graphic37/RPG/main/Fish/Fish%20T1.png',
+            // Add more tier sprites as they become available
+        };
+        
+        // Tilemap data from exported JSON
+        const mapData = {"tileSize":16,"mapWidth":55,"mapHeight":45,"layers":[{"name":"Layer_1","tiles":[{"id":"0","x":23,"y":23},{"id":"1","x":24,"y":23},{"id":"2","x":25,"y":23},{"id":"3","x":26,"y":23},{"id":"4","x":23,"y":24},{"id":"5","x":24,"y":24},{"id":"6","x":25,"y":24},{"id":"7","x":26,"y":24},{"id":"8","x":23,"y":25},{"id":"9","x":24,"y":25},{"id":"10","x":25,"y":25},{"id":"11","x":26,"y":25},{"id":"12","x":23,"y":26},{"id":"13","x":24,"y":26},{"id":"14","x":25,"y":26},{"id":"15","x":26,"y":26},{"id":"16","x":23,"y":27},{"id":"17","x":24,"y":27},{"id":"18","x":25,"y":27},{"id":"19","x":26,"y":27}],"collider":false}]}; // Truncated for brevity
+        
+        // Tile type definitions - map tile IDs to types
+        const tileTypes = {
+            // Trees (0-19 appear to be tree tiles in 4x5 blocks)
+            trees: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            // Stone borders (20-35 appear to be stone tiles)
+            stones: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35],
+            // Grass/ground (36 and others)
+            grass: [36],
+            // Border/edge tiles
+            borders: [60, 61, 62, 63, 64, 65, 66, 67]
+        };
+        
+        // Tilemap data - will be loaded from JSON
+        let tilemapData = null;
+        
+        // Load the tilemap JSON
+        async function loadTilemap() {
+            try {
+                // Using embedded data instead of fetch for simplicity
+                tilemapData = {
+                    tileSize: 16,
+                    mapWidth: 55,
+                    mapHeight: 45,
+                    layers: [{
+                        name: "Layer_1",
+                        tiles: [] // Simplified - would contain full tile data
+                    }]
+                };
+                console.log('Tilemap data initialized');
+            } catch (error) {
+                console.log('Tilemap loading failed, using procedural generation');
+            }
+        }
+        
+        // Extract tree positions from tilemap for interactions
+        function extractTreesFromTilemap() {
+            // Pre-calculated tree positions from the tilemap
+            // These are the 6 trees found in the map
+            const treePositions = [
+                { x: 800, y: 816 },   // Tree at grid (23, 23)
+                { x: 320, y: 1104 },  // Tree at grid (8, 32)
+                { x: 1472, y: 1104 }, // Tree at grid (44, 32)
+                { x: 1440, y: 208 },  // Tree at grid (43, 4)
+                { x: 1248, y: 592 },  // Tree at grid (37, 16)
+                { x: 448, y: 528 }    // Tree at grid (12, 14)
+            ];
+            
+            // Convert to tree objects with variants
+            const treeObjects = treePositions.map(pos => ({
+                type: 'tree',
+                x: pos.x,
+                y: pos.y,
+                variant: ['oak', 'maple', 'birch'][Math.floor(Math.random() * 3)]
+            }));
+            
+            // Return tree objects instead of directly updating rooms
+            return treeObjects;
+        }
+        
+        // Render tilemap background
+        function drawTilemap() {
+            if (!tilemapData || !rooms || !rooms[gameState.currentRoom] || !rooms[gameState.currentRoom].usesTilemap) {
+                drawTiles(); // Use original tile system
+                return;
+            }
+            
+            const layer = tilemapData.layers[0];
+            const scaleFactor = 2; // Scale up the 16x16 tiles
+            
+            // Create a map for quick tile lookup
+            const tileMap = new Map();
+            layer.tiles.forEach(tile => {
+                const key = `${tile.x},${tile.y}`;
+                tileMap.set(key, tile.id);
+            });
+            
+            // Draw all tiles
+            for (let y = 0; y < tilemapData.mapHeight; y++) {
+                for (let x = 0; x < tilemapData.mapWidth; x++) {
+                    const key = `${x},${y}`;
+                    const tileId = tileMap.get(key);
+                    
+                    const drawX = x * tilemapData.tileSize * scaleFactor - gameState.camera.x;
+                    const drawY = y * tilemapData.tileSize * scaleFactor - gameState.camera.y;
+                    
+                    // Skip if outside viewport
+                    if (drawX < -32 || drawX > canvas.width || drawY < -32 || drawY > canvas.height) {
+                        continue;
+                    }
+                    
+                    // Draw based on tile ID
+                    if (tileId !== undefined) {
+                        drawTileById(parseInt(tileId), drawX, drawY, scaleFactor);
+                    } else {
+                        // Draw default grass
+                        ctx.fillStyle = '#4a6a5a';
+                        ctx.fillRect(drawX, drawY, tilemapData.tileSize * scaleFactor, tilemapData.tileSize * scaleFactor);
+                    }
+                }
+            }
+        }
+        
+        // Draw individual tile based on its ID
+        function drawTileById(id, x, y, scale) {
+            const size = tilemapData.tileSize * scale;
+            
+            if (id >= 0 && id <= 19) {
+                // Tree tiles - draw as brown/green
+                const treeColors = ['#228B22', '#32CD32', '#2E8B57', '#3CB371'];
+                ctx.fillStyle = treeColors[id % 4];
+                ctx.fillRect(x, y, size, size);
+                
+                // Add some texture
+                ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
+            } else if (id >= 20 && id <= 35) {
+                // Stone border tiles
+                ctx.fillStyle = '#8B7D6B';
+                ctx.fillRect(x, y, size, size);
+                
+                // Stone texture
+                ctx.fillStyle = '#A0826D';
+                ctx.fillRect(x + 4, y + 4, size - 8, size - 8);
+                ctx.strokeStyle = '#654321';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x + 1, y + 1, size - 2, size - 2);
+            } else if (id === 36) {
+                // Grass tile
+                ctx.fillStyle = '#4a6a5a';
+                ctx.fillRect(x, y, size, size);
+                
+                // Grass texture
+                for (let i = 0; i < 3; i++) {
+                    ctx.strokeStyle = `rgba(0,0,0,${0.05 + i * 0.02})`;
+                    ctx.beginPath();
+                    ctx.moveTo(x + Math.random() * size, y + size);
+                    ctx.lineTo(x + Math.random() * size, y + size - 5);
+                    ctx.stroke();
+                }
+            } else if (id >= 60 && id <= 67) {
+                // Border/edge tiles
+                ctx.fillStyle = '#2a3a2a';
+                ctx.fillRect(x, y, size, size);
+            } else {
+                // Default tile
+                ctx.fillStyle = '#3a5a4a';
+                ctx.fillRect(x, y, size, size);
+            }
+        }
+        
+        // Initialize tilemap loading
+        loadTilemap();
+        
+        // Resource tier definitions with level requirements
+        const resourceRarities = {
+            common: { name: 'Common', multiplier: 1, color: '#8a8a8a', chance: 0.5 },
+            uncommon: { name: 'Uncommon', multiplier: 1.2, color: '#5abaaa', chance: 0.3 },
+            rare: { name: 'Rare', multiplier: 1.5, color: '#5a8afa', chance: 0.15 },
+            epic: { name: 'Epic', multiplier: 2, color: '#aa5afa', chance: 0.04 },
+            perfect: { name: 'Perfect', multiplier: 3, color: '#fa5a5a', chance: 0.01 }
+        };
+        
+        const resourceTiers = {
+            woodcutting: [
+                { name: 'Logs', tier: 1, baseIcon: 'log', levelReq: 1, exp: 10 },
+                { name: 'Logs', tier: 2, baseIcon: 'log', levelReq: 20, exp: 25 },
+                { name: 'Logs', tier: 3, baseIcon: 'log', levelReq: 40, exp: 50 },
+                { name: 'Logs', tier: 4, baseIcon: 'log', levelReq: 60, exp: 75 },
+                { name: 'Logs', tier: 5, baseIcon: 'log', levelReq: 80, exp: 100 }
+            ],
+            mining: [
+                { name: 'Ore', tier: 1, baseIcon: 'ore', levelReq: 1, exp: 10 },
+                { name: 'Ore', tier: 2, baseIcon: 'ore', levelReq: 20, exp: 25 },
+                { name: 'Ore', tier: 3, baseIcon: 'ore', levelReq: 40, exp: 50 },
+                { name: 'Ore', tier: 4, baseIcon: 'ore', levelReq: 60, exp: 75 },
+                { name: 'Ore', tier: 5, baseIcon: 'ore', levelReq: 80, exp: 100 }
+            ],
+            fishing: [
+                { name: 'Fish', tier: 1, baseIcon: 'fish', levelReq: 1, exp: 10 },
+                { name: 'Fish', tier: 2, baseIcon: 'fish', levelReq: 20, exp: 25 },
+                { name: 'Fish', tier: 3, baseIcon: 'fish', levelReq: 40, exp: 50 },
+                { name: 'Fish', tier: 4, baseIcon: 'fish', levelReq: 60, exp: 75 },
+                { name: 'Fish', tier: 5, baseIcon: 'fish', levelReq: 80, exp: 100 }
+            ],
+            farming: [
+                { name: 'Herb', tier: 1, baseIcon: 'herb', levelReq: 1, exp: 10 },
+                { name: 'Herb', tier: 2, baseIcon: 'herb', levelReq: 20, exp: 25 },
+                { name: 'Herb', tier: 3, baseIcon: 'herb', levelReq: 40, exp: 50 },
+                { name: 'Herb', tier: 4, baseIcon: 'herb', levelReq: 60, exp: 75 },
+                { name: 'Herb', tier: 5, baseIcon: 'herb', levelReq: 80, exp: 100 }
+            ],
+            agility: [
+                { name: 'Lap', tier: 1, baseIcon: 'ticket', levelReq: 1, exp: 10 },
+                { name: 'Lap', tier: 2, baseIcon: 'ticket', levelReq: 20, exp: 25 },
+                { name: 'Lap', tier: 3, baseIcon: 'ticket', levelReq: 40, exp: 50 },
+                { name: 'Lap', tier: 4, baseIcon: 'ticket', levelReq: 60, exp: 75 },
+                { name: 'Lap', tier: 5, baseIcon: 'ticket', levelReq: 80, exp: 100 }
+            ]
+        };
+        
+        // Get rarity for a resource
+        function getRarity() {
+            const roll = Math.random();
+            let cumulative = 0;
+            
+            for (const [key, rarity] of Object.entries(resourceRarities)) {
+                cumulative += rarity.chance;
+                if (roll <= cumulative) {
+                    return { key, ...rarity };
+                }
+            }
+            
+            return { key: 'common', ...resourceRarities.common };
+        }
+        
+        // Get icon name based on resource, tier, and rarity
+        function getResourceIcon(baseIcon, tier, rarity) {
+            // Special case for tier 1 ores with sprite variants
+            if (baseIcon === 'ore' && tier === 1) {
+                if (rarity === 'uncommon') return 'ore_uncommon_t1';
+                if (rarity === 'rare') return 'ore_rare_t1';
+                if (rarity === 'epic') return 'ore_epic_t1';
+                if (rarity === 'perfect') return 'ore_perfect_t1';
+            }
+            // Default to base icon for common or unavailable sprites
+            return baseIcon;
+        }
+        
+        // Get available tier based on skill level
+        function getAvailableTier(skill, skillLevel) {
+            const tiers = resourceTiers[skill];
+            if (!tiers) return null;
+            
+            // Filter to only tiers the player can gather at their level
+            const availableTiers = tiers.filter(t => skillLevel >= t.levelReq);
+            if (availableTiers.length === 0) return null;
+            
+            // Calculate chances based on available tiers
+            // Higher tiers are rarer, but become more common as you level up
+            const maxTier = availableTiers[availableTiers.length - 1].tier;
+            const weights = availableTiers.map(t => {
+                // Base weight decreases for higher tiers
+                let weight = Math.pow(0.5, t.tier - 1);
+                // Boost weight if player is significantly over-leveled for this tier
+                if (skillLevel > t.levelReq + 20) {
+                    weight *= 0.5; // Make lower tiers less common when over-leveled
+                }
+                return weight;
+            });
+            
+            // Normalize weights
+            const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+            const normalizedWeights = weights.map(w => w / totalWeight);
+            
+            // Roll for tier
+            const roll = Math.random();
+            let cumulative = 0;
+            
+            for (let i = 0; i < availableTiers.length; i++) {
+                cumulative += normalizedWeights[i];
+                if (roll <= cumulative) {
+                    return availableTiers[i];
+                }
+            }
+            
+            // Fallback to highest available
+            return availableTiers[availableTiers.length - 1];
+        }
+
+        // Load sprite images
+        Object.keys(spriteUrls).forEach(key => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = spriteUrls[key];
+            img.onload = () => {
+                gameState.sprites[key] = img;
+                if (gameState.inventoryOpen) {
+                    updateInventoryDisplay();
+                }
+            };
+            img.onerror = () => {
+                console.error(`Failed to load sprite: ${key}`);
+            };
+        });
+
+        // Room Configurations with better graphics
+        const rooms = {
+            woodcutting: {
+                name: 'Woodcutting Area',
+                groundTiles: ['#4a6a5a', '#3a5a4a', '#5a7a6a'],
+                pathTiles: ['#8a7a6a', '#7a6a5a'],
+                decorations: ['grass', 'rock', 'flower'],
+                objects: [
+                    { type: 'tree', x: 300, y: 250, variant: 'oak' },
+                    { type: 'tree', x: 500, y: 200, variant: 'maple' },
+                    { type: 'tree', x: 400, y: 350, variant: 'birch' },
+                    { type: 'tree', x: 600, y: 300, variant: 'oak' },
+                    { type: 'tree', x: 350, y: 400, variant: 'maple' },
+                    { type: 'tree', x: 550, y: 400, variant: 'birch' }
+                ]
+            },
+            fishing: {
+                name: 'Fishing Spot',
+                groundTiles: ['#3a5a6a', '#2a4a5a', '#4a6a7a'],
+                pathTiles: ['#6a5a4a', '#5a4a3a'],
+                decorations: ['rock', 'reed'],
+                objects: [
+                    { type: 'pond', x: 400, y: 300, width: 300, height: 200 },
+                    { type: 'fishingSpot', x: 350, y: 280 },
+                    { type: 'fishingSpot', x: 450, y: 320 }
+                ]
+            },
+            mining: {
+                name: 'Mine',
+                groundTiles: ['#3a3a4a', '#2a2a3a', '#4a4a5a'],
+                pathTiles: ['#5a5a6a', '#4a4a5a'],
+                decorations: ['rock', 'crystal'],
+                objects: [
+                    { type: 'ore', x: 300, y: 250, variant: 'copper' },
+                    { type: 'ore', x: 500, y: 200, variant: 'iron' },
+                    { type: 'ore', x: 400, y: 350, variant: 'silver' },
+                    { type: 'ore', x: 600, y: 300, variant: 'gold' }
+                ]
+            },
+            combat: {
+                name: 'Combat Training (Auto)', // Auto/idle combat area
+                groundTiles: ['#5a4a4a', '#4a3a3a', '#6a5a5a'],
+                pathTiles: ['#7a6a6a', '#6a5a5a'],
+                decorations: ['weapon_rack', 'banner'],
+                objects: [
+                    { type: 'dummy', x: 350, y: 250 },
+                    { type: 'dummy', x: 450, y: 250 },
+                    { type: 'dummy', x: 400, y: 350 }
+                ]
+            },
+            cooking: {
+                name: 'Cooking Area',
+                groundTiles: ['#6a5a4a', '#5a4a3a', '#7a6a5a'],
+                pathTiles: ['#8a7a6a', '#7a6a5a'],
+                decorations: ['barrel', 'crate'],
+                objects: [
+                    { type: 'stove', x: 300, y: 250 },
+                    { type: 'stove', x: 500, y: 250 },
+                    { type: 'table', x: 400, y: 350 }
+                ]
+            },
+            raids: {
+                name: 'Boss Arena (Manual)', // Manual combat bossing area
+                groundTiles: ['#4a3a3a', '#3a2a2a', '#5a4a4a'],
+                pathTiles: ['#6a5a5a', '#5a4a4a'],
+                decorations: ['skull', 'torch'],
+                objects: [
+                    { type: 'chest', x: 400, y: 200 },
+                    { type: 'chest', x: 300, y: 300 },
+                    { type: 'chest', x: 500, y: 300 },
+                    { type: 'boss', x: 400, y: 400 }
+                ]
+            },
+
+            crafting: {
+                name: 'Crafting Workshop',
+                groundTiles: ['#5a4a3a', '#4a3a2a', '#6a5a4a'],
+                pathTiles: ['#7a6a5a', '#6a5a4a'],
+                decorations: ['tools', 'blueprint'],
+                objects: [
+                    { type: 'workbench', x: 300, y: 250 },
+                    { type: 'anvil', x: 500, y: 250 },
+                    { type: 'forge', x: 400, y: 350 }
+                ]
+            },
+            farming: {
+                name: 'Farming Area',
+                groundTiles: ['#4a5a3a', '#3a4a2a', '#5a6a4a'],
+                pathTiles: ['#7a6a5a', '#6a5a4a'],
+                decorations: ['grass', 'flower'],
+                objects: [
+                    { type: 'crop', x: 300, y: 250 },
+                    { type: 'crop', x: 400, y: 250 },
+                    { type: 'crop', x: 500, y: 250 },
+                    { type: 'crop', x: 350, y: 350 },
+                    { type: 'crop', x: 450, y: 350 }
+                ]
+            },
+            agility: {
+                name: 'Agility Course',
+                groundTiles: ['#5a5a4a', '#4a4a3a', '#6a6a5a'],
+                pathTiles: ['#7a7a6a', '#6a6a5a'],
+                decorations: ['marker', 'flag'],
+                objects: [
+                    { type: 'obstacle', x: 300, y: 250 },
+                    { type: 'obstacle', x: 450, y: 200 },
+                    { type: 'obstacle', x: 500, y: 350 },
+                    { type: 'obstacle', x: 350, y: 400 }
+                ]
+            }
+
+        };
+
+        // Initialize tiles for better graphics
+        function generateTiles() {
+            const room = rooms[gameState.currentRoom];
+            gameState.tiles = [];
+            const tileSize = 50;
+            
+            for (let x = 0; x < canvas.width + tileSize; x += tileSize) {
+                for (let y = 0; y < canvas.height + tileSize; y += tileSize) {
+                    const tileType = Math.random() > 0.8 ? 'path' : 'ground';
+                    const tiles = tileType === 'path' ? room.pathTiles : room.groundTiles;
+                    const color = tiles[Math.floor(Math.random() * tiles.length)];
+                    
+                    gameState.tiles.push({
+                        x, y,
+                        size: tileSize,
+                        color,
+                        type: tileType
+                    });
+                }
+            }
+        }
+
+        // Draw functions with better graphics
+        function drawTiles() {
+            gameState.tiles.forEach(tile => {
+                // Main tile
+                ctx.fillStyle = tile.color;
+                ctx.fillRect(tile.x - gameState.camera.x, tile.y - gameState.camera.y, tile.size, tile.size);
+                
+                // Add subtle grid lines
+                ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(tile.x - gameState.camera.x, tile.y - gameState.camera.y, tile.size, tile.size);
+                
+                // Add texture
+                if (tile.type === 'path') {
+                    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                    ctx.fillRect(
+                        tile.x - gameState.camera.x + 5, 
+                        tile.y - gameState.camera.y + 5, 
+                        tile.size - 10, 
+                        tile.size - 10
+                    );
+                }
+            });
+        }
+
+        function drawTree(x, y, variant) {
+            const colors = {
+                oak: { trunk: '#654321', leaves: ['#228B22', '#32CD32', '#3CB371'] },
+                maple: { trunk: '#8B4513', leaves: ['#FF8C00', '#FF7F50', '#FF6347'] },
+                birch: { trunk: '#F5F5DC', leaves: ['#90EE90', '#98FB98', '#8FBC8F'] }
+            };
+            
+            const tree = colors[variant] || colors.oak;
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 30, 35, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Trunk
+            const gradient = ctx.createLinearGradient(x - 20, y, x + 20, y);
+            gradient.addColorStop(0, tree.trunk);
+            gradient.addColorStop(0.5, '#8B7355');
+            gradient.addColorStop(1, tree.trunk);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x - 20, y - 20, 40, 60);
+            
+            // Leaves layers
+            tree.leaves.forEach((color, i) => {
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x - 20 + i * 10, y - 30 - i * 5, 35 - i * 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x + 20 - i * 10, y - 25 - i * 5, 30 - i * 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x, y - 50 - i * 5, 40 - i * 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.beginPath();
+            ctx.arc(x - 10, y - 45, 15, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawOre(x, y, variant) {
+            const colors = {
+                copper: ['#B87333', '#CD7F32', '#A0522D'],
+                iron: ['#434343', '#565656', '#2F2F2F'],
+                silver: ['#C0C0C0', '#D3D3D3', '#A9A9A9'],
+                gold: ['#FFD700', '#FFED4E', '#FFA500']
+            };
+            
+            const ore = colors[variant] || colors.iron;
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 20, 30, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Rock base
+            ctx.fillStyle = '#2a2a3a';
+            ctx.beginPath();
+            ctx.moveTo(x - 35, y + 20);
+            ctx.lineTo(x - 25, y - 30);
+            ctx.lineTo(x, y - 35);
+            ctx.lineTo(x + 25, y - 30);
+            ctx.lineTo(x + 35, y + 20);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Ore veins
+            ore.forEach((color, i) => {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 4 - i;
+                ctx.beginPath();
+                ctx.moveTo(x - 20 + i * 5, y - 20);
+                ctx.lineTo(x + 20 - i * 5, y + 10);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(x - 10, y - 25 + i * 5);
+                ctx.lineTo(x + 15, y - 5 + i * 5);
+                ctx.stroke();
+            });
+            
+            // Sparkle effect
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            for (let i = 0; i < 3; i++) {
+                const sparkleX = x - 15 + Math.random() * 30;
+                const sparkleY = y - 20 + Math.random() * 30;
+                ctx.beginPath();
+                ctx.arc(sparkleX, sparkleY, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawPlayer() {
+            const { x, y, size } = gameState.player;
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + size, size * 0.8, size * 0.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Body
+            const bodyGradient = ctx.createLinearGradient(x - size, y - size, x + size, y + size);
+            bodyGradient.addColorStop(0, '#4a7a8a');
+            bodyGradient.addColorStop(0.5, '#5a8a9a');
+            bodyGradient.addColorStop(1, '#3a6a7a');
+            ctx.fillStyle = bodyGradient;
+            ctx.fillRect(x - size * 0.6, y - size * 0.5, size * 1.2, size * 1.5);
+            
+            // Head
+            ctx.fillStyle = '#f4c2a0';
+            ctx.beginPath();
+            ctx.arc(x, y - size, size * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Hair
+            ctx.fillStyle = '#3a2a1a';
+            ctx.beginPath();
+            ctx.arc(x, y - size * 1.1, size * 0.6, Math.PI, 0);
+            ctx.fill();
+            
+            // Name
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 3;
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.strokeText('Player', x, y - size * 2);
+            ctx.fillText('Player', x, y - size * 2);
+        }
+
+        function drawRoom() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#1a2a3a');
+            gradient.addColorStop(1, '#0a1a2a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw tiles or tilemap
+            if (rooms[gameState.currentRoom] && rooms[gameState.currentRoom].usesTilemap && tilemapData) {
+                drawTilemap();
+            } else {
+                drawTiles();
+            }
+            
+            // Draw room objects
+            const room = rooms[gameState.currentRoom];
+            if (room.objects) {
+                room.objects.forEach(obj => {
+                    const drawX = obj.x - gameState.camera.x;
+                    const drawY = obj.y - gameState.camera.y;
+                    
+                    switch(obj.type) {
+                        case 'tree':
+                            drawTree(drawX, drawY, obj.variant);
+                            break;
+                        case 'ore':
+                            drawOre(drawX, drawY, obj.variant);
+                            break;
+                        case 'pond':
+                            ctx.fillStyle = '#4682B4';
+                            ctx.fillRect(drawX - obj.width/2, drawY - obj.height/2, obj.width, obj.height);
+                            break;
+                        case 'fishingSpot':
+                            ctx.fillStyle = 'rgba(100, 150, 200, 0.5)';
+                            ctx.beginPath();
+                            ctx.arc(drawX, drawY, 20, 0, Math.PI * 2);
+                            ctx.fill();
+                            break;
+                        case 'dummy':
+                            // Combat dummy
+                            ctx.fillStyle = '#8B7355';
+                            ctx.fillRect(drawX - 15, drawY - 10, 30, 40);
+                            ctx.fillStyle = '#A0826D';
+                            ctx.beginPath();
+                            ctx.arc(drawX, drawY - 25, 15, 0, Math.PI * 2);
+                            ctx.fill();
+                            break;
+                        case 'stove':
+                            // Cooking stove
+                            ctx.fillStyle = '#3a3a3a';
+                            ctx.fillRect(drawX - 30, drawY - 20, 60, 40);
+                            // Fire
+                            ctx.fillStyle = '#FF4500';
+                            for (let i = 0; i < 3; i++) {
+                                ctx.fillRect(drawX - 20 + i * 15, drawY - 10, 10, 15);
+                            }
+                            break;
+                        case 'table':
+                            ctx.fillStyle = '#8B6508';
+                            ctx.fillRect(drawX - 40, drawY - 15, 80, 30);
+                            break;
+                        case 'chest':
+                            // Treasure chest
+                            ctx.fillStyle = '#8B4513';
+                            ctx.fillRect(drawX - 25, drawY - 15, 50, 30);
+                            ctx.fillStyle = '#FFD700';
+                            ctx.fillRect(drawX - 5, drawY - 10, 10, 15);
+                            ctx.strokeStyle = '#654321';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(drawX - 25, drawY - 15, 50, 30);
+                            break;
+                        case 'boss':
+                            // Boss enemy
+                            ctx.fillStyle = '#8B0000';
+                            ctx.fillRect(drawX - 20, drawY - 15, 40, 50);
+                            ctx.fillStyle = '#FF0000';
+                            ctx.beginPath();
+                            ctx.arc(drawX, drawY - 30, 18, 0, Math.PI * 2);
+                            ctx.fill();
+                            break;
+                        case 'pest':
+                            // Pest (rat/spider)
+                            if (obj.variant === 'rat') {
+                                ctx.fillStyle = '#5a4a3a';
+                                ctx.beginPath();
+                                ctx.ellipse(drawX, drawY, 15, 10, 0, 0, Math.PI * 2);
+                                ctx.fill();
+                            } else {
+                                ctx.fillStyle = '#2a2a2a';
+                                ctx.beginPath();
+                                ctx.arc(drawX, drawY, 12, 0, Math.PI * 2);
+                                ctx.fill();
+                                // Spider legs
+                                ctx.strokeStyle = '#2a2a2a';
+                                ctx.lineWidth = 2;
+                                for (let i = 0; i < 8; i++) {
+                                    const angle = (i / 8) * Math.PI * 2;
+                                    ctx.beginPath();
+                                    ctx.moveTo(drawX, drawY);
+                                    ctx.lineTo(drawX + Math.cos(angle) * 20, drawY + Math.sin(angle) * 20);
+                                    ctx.stroke();
+                                }
+                            }
+                            break;
+                        case 'workbench':
+                            // Crafting workbench
+                            ctx.fillStyle = '#654321';
+                            ctx.fillRect(drawX - 35, drawY - 15, 70, 35);
+                            ctx.fillStyle = '#8B7355';
+                            ctx.fillRect(drawX - 30, drawY - 12, 60, 5);
+                            break;
+                        case 'anvil':
+                            // Blacksmith anvil
+                            ctx.fillStyle = '#2a2a3a';
+                            ctx.fillRect(drawX - 20, drawY - 10, 40, 25);
+                            ctx.fillStyle = '#3a3a4a';
+                            ctx.beginPath();
+                            ctx.moveTo(drawX - 25, drawY - 10);
+                            ctx.lineTo(drawX + 25, drawY - 10);
+                            ctx.lineTo(drawX + 20, drawY - 20);
+                            ctx.lineTo(drawX - 20, drawY - 20);
+                            ctx.closePath();
+                            ctx.fill();
+                            break;
+                        case 'forge':
+                            // Forge/furnace
+                            ctx.fillStyle = '#3a3a3a';
+                            ctx.fillRect(drawX - 30, drawY - 25, 60, 50);
+                            // Fire inside
+                            ctx.fillStyle = '#FF6500';
+                            ctx.fillRect(drawX - 20, drawY - 5, 40, 20);
+                            ctx.fillStyle = '#FFD700';
+                            ctx.fillRect(drawX - 15, drawY, 30, 10);
+                            break;
+                        case 'treasure':
+                            // Treasure spot
+                            if (obj.variant === 'buried') {
+                                // X marks the spot
+                                ctx.strokeStyle = '#8B4513';
+                                ctx.lineWidth = 4;
+                                ctx.beginPath();
+                                ctx.moveTo(drawX - 20, drawY - 20);
+                                ctx.lineTo(drawX + 20, drawY + 20);
+                                ctx.stroke();
+                                ctx.beginPath();
+                                ctx.moveTo(drawX - 20, drawY + 20);
+                                ctx.lineTo(drawX + 20, drawY - 20);
+                                ctx.stroke();
+                            } else {
+                                // Treasure chest
+                                ctx.fillStyle = '#FFD700';
+                                ctx.fillRect(drawX - 25, drawY - 15, 50, 30);
+                                ctx.strokeStyle = '#8B4513';
+                                ctx.lineWidth = 3;
+                                ctx.strokeRect(drawX - 25, drawY - 15, 50, 30);
+                                // Gems
+                                ctx.fillStyle = '#FF0000';
+                                ctx.beginPath();
+                                ctx.arc(drawX - 10, drawY, 5, 0, Math.PI * 2);
+                                ctx.fill();
+                                ctx.fillStyle = '#00FF00';
+                                ctx.beginPath();
+                                ctx.arc(drawX, drawY, 5, 0, Math.PI * 2);
+                                ctx.fill();
+                                ctx.fillStyle = '#0000FF';
+                                ctx.beginPath();
+                                ctx.arc(drawX + 10, drawY, 5, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                            break;
+                    }
+                });
+            }
+            
+            // Draw particles
+            gameState.particles.forEach((particle, index) => {
+                ctx.fillStyle = particle.color;
+                ctx.globalAlpha = particle.alpha;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                
+                // Update particle
+                particle.y -= particle.speed;
+                particle.alpha -= 0.02;
+                particle.size *= 0.98;
+                
+                if (particle.alpha <= 0) {
+                    gameState.particles.splice(index, 1);
+                }
+            });
+        }
+
+        // Movement
+        function movePlayer() {
+            if (gameState.player.targetX !== null) {
+                const dx = gameState.player.targetX - gameState.player.x;
+                const dy = gameState.player.targetY - gameState.player.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 5) {
+                    gameState.player.x += (dx / distance) * gameState.player.speed;
+                    gameState.player.y += (dy / distance) * gameState.player.speed;
+                    
+                    // Add movement particles
+                    if (Math.random() > 0.7) {
+                        gameState.particles.push({
+                            x: gameState.player.x + (Math.random() - 0.5) * 20,
+                            y: gameState.player.y + 20,
+                            size: 3,
+                            color: '#8a7a6a',
+                            speed: 1,
+                            alpha: 0.5
+                        });
+                    }
+                } else {
+                    gameState.player.targetX = null;
+                    gameState.player.targetY = null;
+                    
+                    // Start performing action if we reached target
+                    if (gameState.player.currentTarget && !gameState.player.isPerformingAction) {
+                        gameState.player.isPerformingAction = true;
+                        gameState.player.actionProgress = 0;
+                        gameState.player.lastActionTime = Date.now();
+                    }
+                }
+            }
+        }
+
+        // AFK Activity System
+        function selectNextTarget() {
+            if (gameState.currentRoom === 'combat') return; // Combat is not AFK
+            
+            const room = rooms[gameState.currentRoom];
+            if (!room.objects || room.objects.length === 0) return;
+            
+            // Select random object
+            const availableObjects = room.objects.filter(obj => 
+                obj.type !== 'pond' // Don't target ponds, only fishing spots
+            );
+            
+            if (availableObjects.length > 0) {
+                const target = availableObjects[Math.floor(Math.random() * availableObjects.length)];
+                gameState.player.currentTarget = target;
+                gameState.player.targetX = target.x;
+                gameState.player.targetY = target.y;
+            }
+        }
+
+        function performAction() {
+            if (!gameState.player.isPerformingAction || !gameState.player.currentTarget) return;
+            
+            const now = Date.now();
+            const elapsed = now - gameState.player.lastActionTime;
+            gameState.player.actionProgress = Math.min(elapsed / gameState.player.actionDuration, 1);
+            
+            // Draw progress bar above player
+            drawActionProgress();
+            
+            // Action complete
+            if (gameState.player.actionProgress >= 1) {
+                completeAction();
+                gameState.player.isPerformingAction = false;
+                gameState.player.currentTarget = null;
+                
+                // Schedule next action
+                gameState.nextTargetTime = now + 1000; // Wait 1 second before next action
+            }
+        }
+
+        function completeAction() {
+            const room = rooms[gameState.currentRoom];
+            
+            // Get tier-based reward for resource gathering rooms
+            let reward = null;
+            
+            if (['woodcutting', 'mining', 'fishing', 'farming', 'agility'].includes(gameState.currentRoom)) {
+                // Get the skill level for this activity
+                const skillLevel = gameState.player.skills[gameState.currentRoom] || 1;
+                
+                // Get available tier based on skill level
+                const resource = getAvailableTier(gameState.currentRoom, skillLevel);
+                
+                if (resource) {
+                    // Roll for rarity
+                    const rarity = getRarity();
+                    const tierBonus = resource.tier;
+                    
+                    // Calculate rewards with rarity multiplier
+                    const goldReward = Math.floor((10 * tierBonus + Math.floor(Math.random() * 10)) * rarity.multiplier);
+                    const expReward = Math.floor(resource.exp * rarity.multiplier);
+                    
+                    // Get appropriate icon based on rarity
+                    const iconName = getResourceIcon(resource.baseIcon, resource.tier, rarity.key);
+                    
+                    // Create item name with tier and rarity
+                    const itemName = `T${resource.tier} ${rarity.name} ${resource.name}`;
+                    
+                    reward = {
+                        gold: goldReward,
+                        xp: expReward,
+                        item: {
+                            name: itemName,
+                            icon: iconName,
+                            tier: resource.tier,
+                            rarity: rarity.key,
+                            rarityColor: rarity.color,
+                            stackable: true,
+                            type: 'resource'
+                        },
+                        skill: gameState.currentRoom
+                    };
+                    
+                    // Show rarity color in floating text
+                    showFloatingText(`${rarity.name} ${resource.name}!`, gameState.player.x, gameState.player.y - 100, rarity.color);
+                    
+                    // Special effects for rare drops
+                    if (rarity.key === 'perfect') {
+                        showFloatingText(`⭐ PERFECT DROP! ⭐`, gameState.player.x, gameState.player.y - 130, '#FFD700');
+                        // Add extra particles for perfect drops
+                        for (let i = 0; i < 20; i++) {
+                            gameState.particles.push({
+                                x: gameState.player.x + (Math.random() - 0.5) * 60,
+                                y: gameState.player.y + (Math.random() - 0.5) * 60,
+                                size: 8,
+                                color: '#fa5a5a',
+                                speed: 3,
+                                alpha: 1
+                            });
+                        }
+                    } else if (rarity.key === 'epic') {
+                        showFloatingText(`✨ EPIC! ✨`, gameState.player.x, gameState.player.y - 125, rarity.color);
+                    }
+                    
+                    // Show if new tier unlocked
+                    if (skillLevel === resource.levelReq && resource.tier > 1) {
+                        showFloatingText(`NEW TIER UNLOCKED!`, gameState.player.x, gameState.player.y - 120, '#FFD700');
+                    }
+                } else {
+                    // Shouldn't happen, but fallback
+                    reward = {
+                        gold: 10,
+                        xp: 10,
+                        item: null,
+                        skill: gameState.currentRoom
+                    };
+                }
+            } else {
+                // Use default rewards for other rooms
+                const rewards = {
+                    cooking: { gold: 18, xp: 28, item: { name: 'Cooked Food', icon: '🍖', stackable: true, type: 'food' }, skill: 'cooking' },
+                    crafting: { gold: 30, xp: 40, item: { name: 'Crafted Item', icon: '🔨', stackable: true, type: 'material' }, skill: 'crafting' },
+                    raids: { gold: 100, xp: 80, item: { name: 'Raid Loot', icon: '💎', stackable: false, type: 'valuable' }, skill: 'combat' },
+                    combat: { gold: 35, xp: 50, item: null, skill: 'combat' }
+                };
+                
+                reward = rewards[gameState.currentRoom] || { gold: 10, xp: 20, item: null, skill: 'combat' };
+            }
+            
+            // Add gold
+            gameState.player.gold += reward.gold;
+            document.getElementById('goldAmount').textContent = gameState.player.gold.toLocaleString();
+            document.getElementById('invGold').textContent = gameState.player.gold.toLocaleString();
+            
+            // Add item to inventory
+            if (reward.item) {
+                addToInventory(reward.item);
+            }
+            
+            // Level up skill randomly (10% chance, higher chance for rarer resources)
+            const levelUpChance = reward.item && reward.item.tier ? 0.05 + (reward.item.tier * 0.03) : 0.1;
+            if (Math.random() < levelUpChance && reward.skill) {
+                gameState.player.skills[reward.skill]++;
+                updateSkillsDisplay();
+                showFloatingText(`Level Up! ${reward.skill} ${gameState.player.skills[reward.skill]}`, 
+                                gameState.player.x, gameState.player.y - 80, '#FFD700');
+            }
+            
+            // Add success particles
+            for (let i = 0; i < 10; i++) {
+                gameState.particles.push({
+                    x: gameState.player.x + (Math.random() - 0.5) * 40,
+                    y: gameState.player.y + (Math.random() - 0.5) * 40,
+                    size: 5,
+                    color: '#FFD700',
+                    speed: 2,
+                    alpha: 1
+                });
+            }
+            
+            // Show floating text
+            showFloatingText(`+${reward.gold} Gold`, gameState.player.x, gameState.player.y - 40, '#FFD700');
+            if (reward.item) {
+                showFloatingText(`+1 ${reward.item.name}`, gameState.player.x, gameState.player.y - 60, '#5abaaa');
+            }
+        }
+
+        function addToInventory(item) {
+            // Check if item is stackable and already exists
+            if (item.stackable) {
+                const existingItem = gameState.player.inventory.find(invItem => 
+                    invItem && invItem.name === item.name && 
+                    invItem.rarity === item.rarity // Only stack if same rarity
+                );
+                
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else if (gameState.player.inventory.length < gameState.player.inventorySize) {
+                    gameState.player.inventory.push({
+                        ...item,
+                        quantity: 1
+                    });
+                }
+            } else {
+                // Non-stackable items
+                if (gameState.player.inventory.length < gameState.player.inventorySize) {
+                    gameState.player.inventory.push({
+                        ...item,
+                        quantity: 1
+                    });
+                }
+            }
+            
+            updateInventoryDisplay();
+        }
+
+        function updateSkillsDisplay() {
+            // Update skill levels in the sidebar
+            const skillNames = ['hitpoints', 'attack', 'mining', 'strength', 'agility', 
+                               'defence', 'fishing', 'ranged', 'cooking', 
+                               'crafting', 'magic', 'woodcutting',
+                               'farming', 'combat'];
+            
+            const skillItems = document.querySelectorAll('.skill-item');
+            let totalLevel = 0;
+            
+            skillItems.forEach((item, index) => {
+                if (skillNames[index]) {
+                    const skillName = skillNames[index];
+                    const level = gameState.player.skills[skillName] || 1;
+                    const levelSpan = item.querySelector('.skill-level');
+                    if (levelSpan) {
+                        levelSpan.textContent = level;
+                        totalLevel += level;
+                        
+                        // Add tier info for gathering skills
+                        if (['mining', 'fishing', 'woodcutting'].includes(skillName)) {
+                            let tierInfo = 'T1';
+                            if (level >= 80) tierInfo = 'T5';
+                            else if (level >= 60) tierInfo = 'T4';
+                            else if (level >= 40) tierInfo = 'T3';
+                            else if (level >= 20) tierInfo = 'T2';
+                            
+                            // Show next tier requirement
+                            let nextTier = '';
+                            if (level < 20) nextTier = ` (T2 at 20)`;
+                            else if (level < 40) nextTier = ` (T3 at 40)`;
+                            else if (level < 60) nextTier = ` (T4 at 60)`;
+                            else if (level < 80) nextTier = ` (T5 at 80)`;
+                            
+                            item.title = `${skillName.charAt(0).toUpperCase() + skillName.slice(1)}: Level ${level} - ${tierInfo}${nextTier}`;
+                        } else {
+                            item.title = `${skillName.charAt(0).toUpperCase() + skillName.slice(1)}: Level ${level}`;
+                        }
+                    }
+                }
+            });
+            
+            document.getElementById('totalLevel').textContent = totalLevel;
+        }
+
+        function showFloatingText(text, x, y, color) {
+            const floatingText = {
+                text,
+                x,
+                y,
+                color,
+                alpha: 1,
+                speed: 1
+            };
+            
+            if (!gameState.floatingTexts) gameState.floatingTexts = [];
+            gameState.floatingTexts.push(floatingText);
+        }
+
+        function drawActionProgress() {
+            if (!gameState.player.isPerformingAction) return;
+            
+            const barWidth = 60;
+            const barHeight = 8;
+            const x = gameState.player.x - barWidth / 2;
+            const y = gameState.player.y - gameState.player.size * 2.5;
+            
+            // Background
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(x, y, barWidth, barHeight);
+            
+            // Progress
+            ctx.fillStyle = '#5abaaa';
+            ctx.fillRect(x, y, barWidth * gameState.player.actionProgress, barHeight);
+            
+            // Border
+            ctx.strokeStyle = '#2a4a5a';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, barWidth, barHeight);
+        }
+
+        function drawFloatingTexts() {
+            if (!gameState.floatingTexts) return;
+            
+            gameState.floatingTexts.forEach((text, index) => {
+                ctx.fillStyle = text.color;
+                ctx.globalAlpha = text.alpha;
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(text.text, text.x, text.y);
+                ctx.globalAlpha = 1;
+                
+                // Update
+                text.y -= text.speed;
+                text.alpha -= 0.02;
+                
+                if (text.alpha <= 0) {
+                    gameState.floatingTexts.splice(index, 1);
+                }
+            });
+        }
+
+        function checkInteraction() {
+            // Only for combat room (manual interaction)
+            if (gameState.currentRoom !== 'combat') return;
+            
+            const room = rooms[gameState.currentRoom];
+            if (!room.objects) return;
+            
+            room.objects.forEach(obj => {
+                const distance = Math.sqrt(
+                    Math.pow(gameState.player.x - obj.x, 2) + 
+                    Math.pow(gameState.player.y - obj.y, 2)
+                );
+                
+                if (distance < 80) {
+                    // Combat action
+                    gameState.player.gold += 35;
+                    document.getElementById('goldAmount').textContent = gameState.player.gold.toLocaleString();
+                    document.getElementById('invGold').textContent = gameState.player.gold.toLocaleString();
+                    
+                    // Combat particles
+                    for (let i = 0; i < 15; i++) {
+                        gameState.particles.push({
+                            x: obj.x + (Math.random() - 0.5) * 40,
+                            y: obj.y + (Math.random() - 0.5) * 40,
+                            size: 5,
+                            color: '#FF4500',
+                            speed: 3,
+                            alpha: 1
+                        });
+                    }
+                    
+                    showFloatingText('Hit!', obj.x, obj.y - 40, '#FF4500');
+                    showFloatingText('+35 Gold', gameState.player.x, gameState.player.y - 40, '#FFD700');
+                }
+            });
+        }
+
+        // Initialize inventory
+        function initInventory() {
+            updateInventoryDisplay();
+        }
+
+        function updateInventoryDisplay() {
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = '';
+            
+            // Create all 98 slots
+            for (let i = 0; i < 98; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'inv-slot';
+                slot.dataset.index = i;
+                
+                if (i < gameState.player.inventory.length) {
+                    const item = gameState.player.inventory[i];
+                    if (item) {
+                        slot.classList.add('occupied');
+                        slot.style.position = 'relative';
+                        
+                        // Add rarity border
+                        if (item.rarityColor) {
+                            slot.style.borderColor = item.rarityColor;
+                            slot.style.boxShadow = `0 0 5px ${item.rarityColor}40`;
+                        }
+                        
+                        // Create container for item display - fill entire slot
+                        const itemDisplay = document.createElement('div');
+                        itemDisplay.style.position = 'absolute';
+                        itemDisplay.style.top = '4px';  // Small padding
+                        itemDisplay.style.left = '4px';
+                        itemDisplay.style.right = '4px';
+                        itemDisplay.style.bottom = '4px';
+                        
+                        // Use sprite image if available
+                        if (gameState.sprites[item.icon]) {
+                            const img = document.createElement('img');
+                            img.src = gameState.sprites[item.icon].src;
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.objectFit = 'contain';
+                            img.style.imageRendering = 'pixelated';
+                            img.style.imageRendering = '-moz-crisp-edges';
+                            img.style.imageRendering = 'crisp-edges';
+                            itemDisplay.appendChild(img);
+                            
+                            // Add tier and rarity indicator for resources
+                            if (item.tier) {
+                                const tierBadge = document.createElement('div');
+                                tierBadge.style.position = 'absolute';
+                                tierBadge.style.top = '2px';
+                                tierBadge.style.left = '2px';
+                                tierBadge.style.background = 'rgba(0, 0, 0, 0.8)';
+                                tierBadge.style.color = item.rarityColor || ['#8a8a8a', '#5abaaa', '#5a8afa', '#aa5afa', '#fa5a5a'][item.tier - 1];
+                                tierBadge.style.fontSize = '10px';
+                                tierBadge.style.fontWeight = 'bold';
+                                tierBadge.style.padding = '2px 4px';
+                                tierBadge.style.borderRadius = '3px';
+                                tierBadge.style.border = `1px solid ${item.rarityColor || '#8a8a8a'}`;
+                                tierBadge.textContent = `T${item.tier}`;
+                                itemDisplay.appendChild(tierBadge);
+                                
+                                // Add rarity indicator if not common
+                                if (item.rarity && item.rarity !== 'common') {
+                                    const rarityBadge = document.createElement('div');
+                                    rarityBadge.style.position = 'absolute';
+                                    rarityBadge.style.top = '2px';
+                                    rarityBadge.style.right = '2px';
+                                    rarityBadge.style.background = 'rgba(0, 0, 0, 0.8)';
+                                    rarityBadge.style.color = item.rarityColor;
+                                    rarityBadge.style.fontSize = '8px';
+                                    rarityBadge.style.fontWeight = 'bold';
+                                    rarityBadge.style.padding = '1px 3px';
+                                    rarityBadge.style.borderRadius = '3px';
+                                    rarityBadge.style.border = `1px solid ${item.rarityColor}`;
+                                    rarityBadge.textContent = item.rarity.charAt(0).toUpperCase();
+                                    itemDisplay.appendChild(rarityBadge);
+                                }
+                            }
+                        } else if (item.icon === 'ore') {
+                            // Fallback canvas drawing for ore if sprite not loaded
+                            const canvas = document.createElement('canvas');
+                            const slotSize = slot.offsetWidth || 50;
+                            canvas.width = slotSize - 8;
+                            canvas.height = slotSize - 8;
+                            const ctx = canvas.getContext('2d');
+                            ctx.imageSmoothingEnabled = false;
+                            
+                            // Draw ore
+                            ctx.fillStyle = '#696969';
+                            ctx.fillRect(canvas.width * 0.2, canvas.height * 0.3, canvas.width * 0.6, canvas.height * 0.4);
+                            ctx.fillStyle = '#C0C0C0';
+                            ctx.fillRect(canvas.width * 0.3, canvas.height * 0.35, canvas.width * 0.4, canvas.height * 0.3);
+                            
+                            canvas.style.width = '100%';
+                            canvas.style.height = '100%';
+                            itemDisplay.appendChild(canvas);
+                        } else if (item.icon === 'fish') {
+                            // Fallback for fish - use emoji
+                            itemDisplay.innerHTML = `<div class="item-icon" style="font-size: 42px; text-align: center; line-height: 1.2;">🐟</div>`;
+                        } else if (item.icon === 'log') {
+                            // Fallback canvas drawing if image not loaded - fill slot
+                            const canvas = document.createElement('canvas');
+                            const slotSize = slot.offsetWidth || 50;  // Get actual slot size
+                            canvas.width = slotSize - 8;  // Account for padding
+                            canvas.height = slotSize - 8;
+                            const ctx = canvas.getContext('2d');
+                            ctx.imageSmoothingEnabled = false;
+                            
+                            // Draw log to fill canvas
+                            const logHeight = canvas.height * 0.5;
+                            const logY = (canvas.height - logHeight) / 2;
+                            
+                            ctx.fillStyle = '#8B4513';
+                            ctx.fillRect(4, logY, canvas.width - 8, logHeight);
+                            ctx.fillStyle = '#654321';
+                            ctx.fillRect(4, logY, canvas.width - 8, logHeight * 0.25);
+                            ctx.fillStyle = '#A0522D';
+                            ctx.fillRect(6, logY + logHeight * 0.3, canvas.width - 12, logHeight * 0.4);
+                            
+                            canvas.style.width = '100%';
+                            canvas.style.height = '100%';
+                            itemDisplay.appendChild(canvas);
+                        } else {
+                            // Use emoji for other items - make it larger
+                            itemDisplay.innerHTML = `<div class="item-icon" style="font-size: 48px; text-align: center; line-height: 1.2;">${item.icon || '📦'}</div>`;
+                        }
+                        
+                        slot.appendChild(itemDisplay);
+                        
+                        // Add quantity display
+                        if (item.quantity > 1) {
+                            const qty = document.createElement('div');
+                            qty.className = 'item-quantity';
+                            qty.textContent = item.quantity > 999 ? '999+' : item.quantity;
+                            slot.appendChild(qty);
+                        }
+                        
+                        slot.dataset.item = JSON.stringify(item);
+                        
+                        // Add click handler for equipping
+                        slot.addEventListener('click', () => handleItemClick(i, item));
+                    }
+                } else {
+                    slot.classList.add('empty');
+                }
+                
+                grid.appendChild(slot);
+            }
+            
+            // Update space counter
+            document.getElementById('invSpace').textContent = gameState.player.inventory.length;
+        }
+
+        function handleItemClick(index, item) {
+            // Determine if item is equippable
+            const equipSlots = ['head', 'amulet', 'cape', 'chest', 'legs', 'boots', 'gloves', 'ring', 'weapon', 'off-hand', 'arrows'];
+            
+            if (item.type && equipSlots.includes(item.type)) {
+                // Equip the item
+                const currentEquipped = gameState.player.equipment[item.type];
+                
+                // Swap items
+                gameState.player.equipment[item.type] = item;
+                
+                // Remove from inventory
+                gameState.player.inventory.splice(index, 1);
+                
+                // Add previously equipped item back to inventory if exists
+                if (currentEquipped) {
+                    gameState.player.inventory.push(currentEquipped);
+                }
+                
+                updateInventoryDisplay();
+                updateEquipmentDisplay();
+                showFloatingText(`Equipped ${item.name}`, canvas.width / 2, 200, '#5abaaa');
+            }
+        }
+
+        function updateEquipmentDisplay() {
+            const equipSlots = document.querySelectorAll('.equip-slot');
+            
+            equipSlots.forEach(slot => {
+                const slotName = slot.dataset.slot;
+                if (!slotName) return; // Skip if no slot name (shouldn't happen)
+                
+                // Convert slot name to equipment key (e.g., "Off-Hand" -> "off-hand")
+                const slotKey = slotName.toLowerCase().replace(' ', '-');
+                const equipped = gameState.player.equipment[slotKey];
+                
+                if (equipped) {
+                    slot.classList.remove('empty');
+                    slot.classList.add('equipped');
+                    slot.dataset.icon = equipped.icon || '';
+                    slot.dataset.item = equipped.name;
+                } else {
+                    slot.classList.add('empty');
+                    slot.classList.remove('equipped');
+                    slot.dataset.icon = '';
+                    slot.dataset.item = '';
+                }
+                
+                // Remove existing click handlers by cloning
+                const newSlot = slot.cloneNode(true);
+                slot.parentNode.replaceChild(newSlot, slot);
+                
+                // Add click handler for unequipping
+                newSlot.addEventListener('click', () => {
+                    const currentEquipped = gameState.player.equipment[slotKey];
+                    if (currentEquipped) {
+                        // Unequip item
+                        gameState.player.equipment[slotKey] = null;
+                        gameState.player.inventory.push(currentEquipped);
+                        updateInventoryDisplay();
+                        updateEquipmentDisplay();
+                        showFloatingText(`Unequipped ${currentEquipped.name}`, canvas.width / 2, 200, '#8a9aaa');
+                    }
+                });
+            });
+            
+            // Re-setup tooltips after updating
+            if (typeof setupEquipmentTooltips === 'function') {
+                setupEquipmentTooltips();
+            }
+        }
+
+        // Setup equipment slot tooltips
+        function setupEquipmentTooltips() {
+            const tooltip = document.querySelector('.tooltip');
+            if (!tooltip) return;
+            
+            document.querySelectorAll('.equip-slot').forEach(slot => {
+                // Remove existing listeners by cloning
+                const newSlot = slot.cloneNode(true);
+                slot.parentNode.replaceChild(newSlot, slot);
+                
+                newSlot.addEventListener('mouseenter', (e) => {
+                    const slotName = newSlot.dataset.slot;
+                    const itemName = newSlot.dataset.item;
+                    
+                    if (itemName) {
+                        tooltip.innerHTML = `<span class="tooltip-item">${slotName} slot: ${itemName}</span>`;
+                    } else {
+                        tooltip.innerHTML = `<span class="tooltip-empty">${slotName} slot: Empty</span>`;
+                    }
+                    
+                    tooltip.classList.add('show');
+                    
+                    // Position tooltip
+                    const rect = newSlot.getBoundingClientRect();
+                    tooltip.style.left = (rect.left - tooltip.offsetWidth - 10) + 'px';
+                    tooltip.style.top = (rect.top + rect.height/2 - tooltip.offsetHeight/2) + 'px';
+                });
+                
+                newSlot.addEventListener('mouseleave', () => {
+                    tooltip.classList.remove('show');
+                });
+            });
+        }
+
+        // Game loop
+        function gameLoop() {
+            drawRoom();
+            
+            // AFK Activity Logic (only if AFK mode is enabled)
+            if (gameState.currentRoom !== 'combat' && gameState.afkMode) {
+                // Select new target if needed
+                if (!gameState.player.currentTarget && !gameState.player.targetX && Date.now() > gameState.nextTargetTime) {
+                    selectNextTarget();
+                }
+                
+                // Perform current action
+                performAction();
+            } else if (!gameState.afkMode) {
+                // Manual mode - only perform action if player clicked on something
+                if (gameState.player.isPerformingAction) {
+                    performAction();
+                }
+            }
+            
+            movePlayer();
+            drawPlayer();
+            drawActionProgress();
+            drawFloatingTexts();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listeners
+        canvas.addEventListener('click', (e) => {
+            if (!gameState.inventoryOpen) {
+                // Allow manual clicking in all rooms when not in AFK mode
+                if (gameState.currentRoom === 'combat' || !gameState.afkMode) {
+                    // Get canvas-relative coordinates
+                    const rect = canvas.getBoundingClientRect();
+                    gameState.player.targetX = e.clientX - rect.left;
+                    gameState.player.targetY = e.clientY - rect.top;
+                }
+            }
+        });
+
+        // AFK Mode toggle
+        document.getElementById('afkToggle').addEventListener('click', () => {
+            gameState.afkMode = !gameState.afkMode;
+            const btn = document.getElementById('afkToggle');
+            
+            if (gameState.afkMode) {
+                btn.textContent = 'AFK Mode';
+                btn.classList.add('active');
+                showFloatingText('AFK Mode Enabled', canvas.width / 2, 150, '#5abaaa');
+                // Reset target for AFK mode to start
+                gameState.nextTargetTime = Date.now() + 1000;
+            } else {
+                btn.textContent = 'Manual Mode';
+                btn.classList.remove('active');
+                showFloatingText('Manual Mode Enabled', canvas.width / 2, 150, '#FFD700');
+                // Clear any current AFK targets
+                gameState.player.currentTarget = null;
+                gameState.player.targetX = null;
+                gameState.player.targetY = null;
+                gameState.player.isPerformingAction = false;
+            }
+        });
+
+        // Room switching from sidebar
+        document.querySelectorAll('.menu-item[data-room]').forEach(item => {
+            item.addEventListener('click', () => {
+                const room = item.dataset.room;
+                if (rooms[room]) {
+                    // Update active state
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // Change room
+                    gameState.currentRoom = room;
+                    let roomDisplayName = rooms[room].name;
+                    
+                    // Add tier info for gathering rooms
+                    if (['woodcutting', 'mining', 'fishing', 'farming', 'agility'].includes(room)) {
+                        const skillLevel = gameState.player.skills[room] || 1;
+                        let maxTier = 1;
+                        if (skillLevel >= 80) maxTier = 5;
+                        else if (skillLevel >= 60) maxTier = 4;
+                        else if (skillLevel >= 40) maxTier = 3;
+                        else if (skillLevel >= 20) maxTier = 2;
+                        
+                        roomDisplayName += ` (T1-T${maxTier} Available)`;
+                    }
+                    
+                    document.getElementById('currentRoom').textContent = roomDisplayName;
+                    generateTiles();
+                    
+                    // Reset player position and state
+                    gameState.player.x = canvas.width / 2;
+                    gameState.player.y = canvas.height / 2;
+                    gameState.player.targetX = null;
+                    gameState.player.targetY = null;
+                    gameState.player.currentTarget = null;
+                    gameState.player.isPerformingAction = false;
+                    gameState.nextTargetTime = Date.now() + 1000; // Start activities after 1 second
+                    
+                    // Show room info based on mode with tier info
+                    let infoText = gameState.afkMode ? 
+                        (room === 'combat' ? 'Combat - Manual Only!' : `AFK Mode - Auto ${room.charAt(0).toUpperCase() + room.slice(1)}`) :
+                        `Manual Mode - ${room.charAt(0).toUpperCase() + room.slice(1)}`;
+                    
+                    // Add skill level and tier info for gathering rooms
+                    if (['woodcutting', 'mining', 'fishing', 'farming', 'agility'].includes(room)) {
+                        const skillLevel = gameState.player.skills[room] || 1;
+                        let maxTier = 1;
+                        if (skillLevel >= 80) maxTier = 5;
+                        else if (skillLevel >= 60) maxTier = 4;
+                        else if (skillLevel >= 40) maxTier = 3;
+                        else if (skillLevel >= 20) maxTier = 2;
+                        
+                        infoText += ` - Level ${skillLevel} (T${maxTier} Max)`;
+                    }
+                    
+                    showFloatingText(infoText, canvas.width / 2, 100, '#FFD700');
+                }
+            });
+        });
+
+        // Sidebar toggle
+        // Sidebar toggle
+        document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('leftSidebar');
+            const canvas = document.getElementById('gameCanvas');
+            sidebar.classList.toggle('collapsed');
+            this.textContent = sidebar.classList.contains('collapsed') ? '⟩' : '⟨';
+            
+            // Adjust canvas position
+            if (sidebar.classList.contains('collapsed')) {
+                canvas.classList.add('expanded');
+            } else {
+                canvas.classList.remove('expanded');
+            }
+            
+            // Adjust top bar position
+            const topBar = document.getElementById('topBar');
+            topBar.style.left = sidebar.classList.contains('collapsed') ? '30px' : '270px';
+        });
+        
+        // Inventory toggle
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                gameState.inventoryOpen = !gameState.inventoryOpen;
+                document.getElementById('inventoryUI').style.display = 
+                    gameState.inventoryOpen ? 'block' : 'none';
+            }
+            
+            // Toggle AFK mode with 'A' key
+            if (e.key === 'a' || e.key === 'A') {
+                document.getElementById('afkToggle').click();
+            }
+        });
+
+        // Close button
+        document.getElementById('closeInventory').addEventListener('click', () => {
+            gameState.inventoryOpen = false;
+            document.getElementById('inventoryUI').style.display = 'none';
+        });
+
+        // Inventory button
+        document.querySelector('.menu-item:nth-child(2)').addEventListener('click', () => {
+            gameState.inventoryOpen = true;
+            document.getElementById('inventoryUI').style.display = 'block';
+        });
+
+        // Sort button
+        document.getElementById('sortBtn').addEventListener('click', () => {
+            // Define rarity order (lower index = lower rarity)
+            const rarityOrder = {
+                'common': 0,
+                'uncommon': 1,
+                'rare': 2,
+                'epic': 3,
+                'perfect': 4,
+                'legendary': 5
+            };
+            
+            // Define resource type order
+            const getResourceType = (itemName) => {
+                const nameLower = itemName.toLowerCase();
+                if (nameLower.includes('log')) return 'wood';
+                if (nameLower.includes('ore')) return 'ore';
+                if (nameLower.includes('fish')) return 'fish';
+                if (nameLower.includes('cooked')) return 'food';
+                // Equipment types
+                if (nameLower.includes('sword') || nameLower.includes('dagger') || 
+                    nameLower.includes('bow') || nameLower.includes('staff')) return 'weapon';
+                if (nameLower.includes('armor') || nameLower.includes('helm') || 
+                    nameLower.includes('boots') || nameLower.includes('gloves')) return 'armor';
+                if (nameLower.includes('ring') || nameLower.includes('amulet')) return 'accessory';
+                return 'other';
+            };
+            
+            const resourceTypeOrder = {
+                'wood': 0,
+                'ore': 1,
+                'fish': 2,
+                'food': 3,
+                'weapon': 4,
+                'armor': 5,
+                'accessory': 6,
+                'other': 7
+            };
+            
+            // Sort inventory
+            gameState.player.inventory.sort((a, b) => {
+                // Skip null/undefined items
+                if (!a) return 1;
+                if (!b) return -1;
+                
+                // First, sort by resource type
+                const typeA = getResourceType(a.name || '');
+                const typeB = getResourceType(b.name || '');
+                const typeOrder = (resourceTypeOrder[typeA] || 999) - (resourceTypeOrder[typeB] || 999);
+                if (typeOrder !== 0) return typeOrder;
+                
+                // Then sort by tier (if items have tiers)
+                const tierA = a.tier || 0;
+                const tierB = b.tier || 0;
+                if (tierA !== tierB) return tierA - tierB;
+                
+                // Finally sort by rarity
+                const rarityA = rarityOrder[a.rarity] !== undefined ? rarityOrder[a.rarity] : 999;
+                const rarityB = rarityOrder[b.rarity] !== undefined ? rarityOrder[b.rarity] : 999;
+                return rarityA - rarityB;
+            });
+            
+            // Update display
+            updateInventoryDisplay();
+            showFloatingText('Inventory Sorted!', canvas.width / 2, 200, '#5abaaa');
+            
+            // Visual feedback on inventory slots
+            const slots = document.querySelectorAll('.inv-slot');
+            slots.forEach((slot, index) => {
+                setTimeout(() => {
+                    slot.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        slot.style.transform = 'scale(1)';
+                    }, 100);
+                }, index * 20);
+            });
+        });
+
+        // Initialize
+        generateTiles();
+        initInventory();
+        updateEquipmentDisplay();
+        updateSkillsDisplay();
+        
+        // Set initial room display with tier info
+        if (['woodcutting', 'mining', 'fishing', 'farming', 'agility'].includes(gameState.currentRoom)) {
+            const skillLevel = gameState.player.skills[gameState.currentRoom] || 1;
+            let maxTier = 1;
+            if (skillLevel >= 80) maxTier = 5;
+            else if (skillLevel >= 60) maxTier = 4;
+            else if (skillLevel >= 40) maxTier = 3;
+            else if (skillLevel >= 20) maxTier = 2;
+            
+            const roomName = rooms[gameState.currentRoom].name;
+            document.getElementById('currentRoom').textContent = `${roomName} (T1-T${maxTier} Available)`;
+        }
+        
+        gameLoop();
+        
+        // Add tooltip element to body
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        document.body.appendChild(tooltip);
+        
+        // Initial tooltip setup
+        setupEquipmentTooltips();
+        
+        // X button functionality  
+        const xButton = document.querySelector('.cat-icon.x-btn');
+        if (xButton) {
+            xButton.addEventListener('click', () => {
+                // Clear all category filters
+                document.querySelectorAll('.cat-icon').forEach(cat => {
+                    cat.classList.remove('active');
+                });
+                // Clear selected items
+                document.querySelectorAll('.inv-slot.selected').forEach(slot => {
+                    slot.classList.remove('selected');
+                });
+                showFloatingText('Cleared', canvas.width / 2, 200, '#5abaaa');
+            });
+        }
+        
+        // Handle monitor/window changes - force redraw when window becomes visible or is focused
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                resizeCanvas();
+            }
+        });
+        
+        window.addEventListener('focus', () => {
+            resizeCanvas();
+        });
+        
+        // Start AFK activities after a short delay
+        setTimeout(() => {
+            showFloatingText('AFK Mode Active - Press A to toggle', canvas.width / 2, 100, '#FFD700');
+        }, 500);
+    </script>
+</body>
+</html>
