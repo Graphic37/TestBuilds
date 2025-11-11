@@ -4194,7 +4194,7 @@ const firebaseConfig = {
         // Grand Exchange / Player Market menu handler
         document.querySelectorAll('.menu-item').forEach(item => {
             const text = item.textContent.trim();
-            if (text === 'Player market') {
+            if (text.includes('Player market')) {
                 item.addEventListener('click', () => {
                     if (isFirebaseConfigured && database) {
                         if (!currentUser || isGuestMode) {
