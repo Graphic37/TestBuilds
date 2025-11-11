@@ -812,215 +812,454 @@
             background: rgba(255, 50, 50, 0.4);
         }
 
-        /* Player Market Modal */
-        #marketModal {
+
+        /* Grand Exchange Modal - OSRS Style */
+        #grandExchangeModal {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 1200px;
-            height: 80vh;
-            background: linear-gradient(135deg, #1a2936 0%, #0f1824 100%);
-            border: 3px solid #2a4a5a;
-            border-radius: 15px;
-            z-index: 1000;
+            width: 900px;
+            max-height: 90vh;
+            background: linear-gradient(135deg, #3d3021 0%, #2e2014 100%);
+            border: 3px solid #847256;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
             display: none;
             flex-direction: column;
+            z-index: 1000;
         }
 
-        .market-header {
-            padding: 20px;
-            border-bottom: 2px solid #2a4a5a;
+        .ge-header {
+            background: linear-gradient(135deg, #544633 0%, #433629 100%);
+            border-bottom: 2px solid #847256;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .market-title {
-            color: #5abaaa;
-            font-size: 24px;
+        .ge-title {
+            color: #ff9933;
+            font-size: 20px;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            text-shadow: 2px 2px 0 #000;
         }
 
-        .market-tabs {
+        .ge-close-btn {
+            width: 30px;
+            height: 30px;
+            background: #8b0000;
+            color: white;
+            border: 2px solid #660000;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .ge-close-btn:hover {
+            background: #a00000;
+        }
+
+        .ge-content {
             display: flex;
-            gap: 10px;
-            padding: 15px 20px;
-            border-bottom: 2px solid #2a4a5a;
-        }
-
-        .market-tab {
-            padding: 10px 20px;
-            background: rgba(42, 74, 90, 0.3);
-            color: #8a9aaa;
-            border: 2px solid #2a4a5a;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-
-        .market-tab:hover {
-            background: rgba(74, 154, 138, 0.2);
-            border-color: #4a9a8a;
-        }
-
-        .market-tab.active {
-            background: linear-gradient(135deg, #4a7a6a, #3a6a5a);
-            color: #5abaaa;
-            border-color: #5a8a7a;
-        }
-
-        .market-content {
             flex: 1;
-            overflow-y: auto;
+            overflow: hidden;
+        }
+
+        .ge-slots-container {
+            width: 500px;
             padding: 20px;
+            border-right: 2px solid #847256;
+            overflow-y: auto;
         }
 
-        .market-listings {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
+        .slots-section {
+            margin-bottom: 25px;
         }
 
-        .market-listing {
-            background: linear-gradient(135deg, #2a3a4a, #1a2a3a);
-            border: 2px solid #3a5a6a;
-            border-radius: 10px;
-            padding: 15px;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .market-listing:hover {
-            border-color: #5abaaa;
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(90, 186, 170, 0.3);
-        }
-
-        .listing-item-name {
-            color: #5abaaa;
+        .slots-section-title {
+            color: #ff9933;
             font-size: 16px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            text-shadow: 1px 1px 0 #000;
         }
 
-        .listing-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .listing-price {
-            color: #FFD700;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .listing-quantity {
-            color: #8a9aaa;
-            font-size: 14px;
-        }
-
-        .listing-seller {
-            color: #6a8a9a;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .buy-btn, .sell-btn {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #4a7a6a, #3a6a5a);
-            color: #5abaaa;
-            border: 2px solid #5a8a7a;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .buy-btn:hover, .sell-btn:hover {
-            background: linear-gradient(135deg, #5a8a7a, #4a7a6a);
-            transform: translateY(-2px);
-        }
-
-        .sell-item-section {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #2a4a5a;
-            margin-bottom: 20px;
-        }
-
-        .sell-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-label {
-            color: #8a9aaa;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .form-input {
-            padding: 10px;
-            background: rgba(26, 42, 54, 0.8);
-            border: 2px solid #2a4a5a;
-            border-radius: 6px;
-            color: #cad2da;
-            font-size: 14px;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #5abaaa;
-        }
-
-        .inventory-select-grid {
+        .offer-slots {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
         }
 
-        .selectable-item {
-            aspect-ratio: 1;
-            background: linear-gradient(135deg, #2a4a5a, #1a3a4a);
-            border: 2px solid #3a5a6a;
-            border-radius: 8px;
+        .offer-slot {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #3a2f1e 0%, #2a1f0e 100%);
+            border: 2px solid #5a4d3a;
             cursor: pointer;
             position: relative;
             transition: all 0.2s;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
         }
 
-        .selectable-item:hover {
-            border-color: #5abaaa;
+        .offer-slot:hover {
+            border-color: #ff9933;
             transform: scale(1.05);
         }
 
-        .selectable-item.selected {
-            border-color: #FFD700;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        .offer-slot.empty::before {
+            content: '+';
+            font-size: 40px;
+            color: #5a4d3a;
+        }
+
+        .offer-slot.empty:hover::before {
+            color: #ff9933;
+        }
+
+        .offer-slot.active {
+            border-color: #00ff00;
+            background: linear-gradient(135deg, #2a3f1e 0%, #1a2f0e 100%);
+        }
+
+        .offer-slot.completed {
+            border-color: #ffff00;
+            background: linear-gradient(135deg, #4a4f1e 0%, #3a3f0e 100%);
+        }
+
+        .offer-slot.partial {
+            border-color: #ffa500;
+            background: linear-gradient(135deg, #4a3f1e 0%, #3a2f0e 100%);
+        }
+
+        .slot-item-icon {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .slot-item-name {
+            font-size: 10px;
+            color: #ff9933;
+            text-align: center;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .slot-quantity {
+            font-size: 9px;
+            color: #ffff00;
+        }
+
+        .slot-status {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 8px;
+            color: #00ff00;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .ge-details-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .ge-details-content {
+            display: none;
+        }
+
+        .ge-details-content.active {
+            display: block;
+        }
+
+        .details-title {
+            color: #ff9933;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .offer-form {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border: 2px solid #5a4d3a;
+            border-radius: 5px;
+        }
+
+        .ge-form-group {
+            margin-bottom: 20px;
+        }
+
+        .ge-form-label {
+            color: #ff9933;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .ge-form-input {
+            width: 100%;
+            padding: 10px;
+            background: #2a1f0e;
+            border: 2px solid #5a4d3a;
+            color: white;
+            font-size: 14px;
+        }
+
+        .ge-form-input:focus {
+            outline: none;
+            border-color: #ff9933;
+        }
+
+        .ge-item-search {
+            width: 100%;
+            padding: 10px;
+            background: #2a1f0e;
+            border: 2px solid #5a4d3a;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .ge-item-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #5a4d3a;
+            background: #2a1f0e;
+        }
+
+        .ge-item-result {
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #3a2d1a;
+        }
+
+        .ge-item-result:hover {
+            background: #3a2f1e;
+        }
+
+        .ge-item-result-icon {
+            font-size: 32px;
+        }
+
+        .ge-item-result-info {
+            flex: 1;
+        }
+
+        .ge-item-result-name {
+            color: #ff9933;
+            font-weight: bold;
+        }
+
+        .ge-item-result-price {
+            color: #ffff00;
+            font-size: 12px;
+        }
+
+        .ge-price-controls, .ge-quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .ge-price-btn, .ge-qty-btn {
+            padding: 8px 12px;
+            background: #3a2f1e;
+            border: 2px solid #5a4d3a;
+            color: #ff9933;
+            cursor: pointer;
+            font-weight: bold;
+            min-width: 50px;
+        }
+
+        .ge-price-btn:hover, .ge-qty-btn:hover {
+            background: #4a3f2e;
+            border-color: #ff9933;
+        }
+
+        .ge-guide-price {
+            color: #00ff00;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .ge-total-display {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            margin-top: 15px;
+            border: 2px solid #5a4d3a;
+            text-align: center;
+        }
+
+        .ge-total-label {
+            color: #ff9933;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .ge-total-amount {
+            color: #ffff00;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .ge-total-amount .gp {
+            font-size: 14px;
+            color: #ffa500;
+        }
+
+        .ge-offer-status-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border: 2px solid #5a4d3a;
+            border-radius: 5px;
+        }
+
+        .ge-status-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #3a2d1a;
+        }
+
+        .ge-status-label {
+            color: #ff9933;
+            font-size: 14px;
+        }
+
+        .ge-status-value {
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .ge-progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #2a1f0e;
+            border: 2px solid #5a4d3a;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ge-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00 0%, #00aa00 100%);
+            transition: width 0.3s;
+        }
+
+        .ge-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .ge-action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .ge-confirm-btn {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #00aa00 0%, #008800 100%);
+            border: 2px solid #00ff00;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .ge-confirm-btn:hover {
+            background: linear-gradient(135deg, #00cc00 0%, #00aa00 100%);
+        }
+
+        .ge-confirm-btn:disabled {
+            background: #3a3a3a;
+            border-color: #5a5a5a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .ge-cancel-btn {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #aa0000 0%, #880000 100%);
+            border: 2px solid #ff0000;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .ge-cancel-btn:hover {
+            background: linear-gradient(135deg, #cc0000 0%, #aa0000 100%);
+        }
+
+        .ge-collect-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ffaa00 0%, #ff8800 100%);
+            border: 2px solid #ffcc00;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 1px 1px 0 #000;
+            margin-top: 10px;
+        }
+
+        .ge-collect-btn:hover {
+            background: linear-gradient(135deg, #ffcc00 0%, #ffaa00 100%);
+        }
+
+        .ge-empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #8a7a6a;
+        }
+
+        .ge-empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .ge-empty-state-text {
+            font-size: 16px;
+        }
+
+        .ge-tax-notice {
+            color: #ffa500;
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid #ffa500;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -1306,59 +1545,144 @@
         </div>
     </div>
 
-    <!-- Player Market Modal -->
-    <div id="marketModal">
-        <div class="market-header">
-            <div class="market-title">💱 Player Market</div>
-            <button class="close-btn" id="closeMarket">✖</button>
+    <!-- Grand Exchange Modal -->
+    <div id="grandExchangeModal">
+        <div class="ge-header">
+            <div class="ge-title">📜 Grand Exchange</div>
+            <button class="ge-close-btn" id="closeGE">✖</button>
         </div>
 
-        <div class="market-tabs">
-            <div class="market-tab active" data-tab="browse">Browse Listings</div>
-            <div class="market-tab" data-tab="sell">Sell Items</div>
-            <div class="market-tab" data-tab="mylistings">My Listings</div>
-        </div>
-
-        <div class="market-content">
-            <!-- Browse Tab -->
-            <div class="market-tab-content" id="browseTab">
-                <div class="inv-search-bar" style="margin-bottom: 20px;">
-                    <input type="text" class="search-input" id="marketSearch" placeholder="Search items...">
-                    <button class="search-btn" id="searchMarketBtn">Search</button>
+        <div class="ge-content">
+            <!-- Left Side - Offer Slots -->
+            <div class="ge-slots-container">
+                <div class="slots-section">
+                    <div class="slots-section-title">🔽 Buy Offers</div>
+                    <div class="offer-slots" id="buySlots">
+                        <div class="offer-slot empty" data-slot-type="buy" data-slot-index="0"></div>
+                        <div class="offer-slot empty" data-slot-type="buy" data-slot-index="1"></div>
+                        <div class="offer-slot empty" data-slot-type="buy" data-slot-index="2"></div>
+                        <div class="offer-slot empty" data-slot-type="buy" data-slot-index="3"></div>
+                    </div>
                 </div>
-                <div class="market-listings" id="marketListings">
-                    <!-- Listings will be populated here -->
-                </div>
-            </div>
 
-            <!-- Sell Tab -->
-            <div class="market-tab-content" id="sellTab" style="display: none;">
-                <div class="sell-item-section">
-                    <h3 style="color: #5abaaa; margin-bottom: 15px;">Create New Listing</h3>
-                    <div class="sell-form">
-                        <div class="form-group">
-                            <label class="form-label">Select Item from Inventory:</label>
-                            <div class="inventory-select-grid" id="sellInventoryGrid">
-                                <!-- Inventory items will be populated here -->
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Price (Gold):</label>
-                            <input type="number" class="form-input" id="sellPrice" placeholder="Enter price in gold" min="1">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Quantity:</label>
-                            <input type="number" class="form-input" id="sellQuantity" placeholder="How many to sell" min="1" value="1">
-                        </div>
-                        <button class="sell-btn" id="createListingBtn">Create Listing</button>
+                <div class="slots-section">
+                    <div class="slots-section-title">🔼 Sell Offers</div>
+                    <div class="offer-slots" id="sellSlots">
+                        <div class="offer-slot empty" data-slot-type="sell" data-slot-index="0"></div>
+                        <div class="offer-slot empty" data-slot-type="sell" data-slot-index="1"></div>
+                        <div class="offer-slot empty" data-slot-type="sell" data-slot-index="2"></div>
+                        <div class="offer-slot empty" data-slot-type="sell" data-slot-index="3"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- My Listings Tab -->
-            <div class="market-tab-content" id="myListingsTab" style="display: none;">
-                <div class="market-listings" id="myListingsGrid">
-                    <!-- User's listings will be populated here -->
+            <!-- Right Side - Offer Details -->
+            <div class="ge-details-container">
+                <!-- Empty State -->
+                <div class="ge-details-content active" id="emptyState">
+                    <div class="ge-empty-state">
+                        <div class="ge-empty-state-icon">📦</div>
+                        <div class="ge-empty-state-text">Select an offer slot to buy or sell items</div>
+                    </div>
+                </div>
+
+                <!-- Create Buy Offer -->
+                <div class="ge-details-content" id="createBuyOffer">
+                    <div class="details-title">🔽 Create Buy Offer</div>
+                    <div class="offer-form">
+                        <div class="ge-form-group">
+                            <label class="ge-form-label">Search for item:</label>
+                            <input type="text" class="ge-item-search" id="buyItemSearch" placeholder="Type item name...">
+                            <div class="ge-item-results" id="buyItemResults"></div>
+                        </div>
+
+                        <div class="ge-form-group" id="buyPriceGroup" style="display: none;">
+                            <label class="ge-form-label">Price per item:</label>
+                            <input type="number" class="ge-form-input" id="buyPrice" min="1" value="1">
+                            <div class="ge-guide-price" id="buyGuidePrice"></div>
+                            <div class="ge-price-controls">
+                                <button class="ge-price-btn" data-action="guide">Guide Price</button>
+                                <button class="ge-price-btn" data-action="5%">+5%</button>
+                                <button class="ge-price-btn" data-action="10%">+10%</button>
+                            </div>
+                        </div>
+
+                        <div class="ge-form-group" id="buyQuantityGroup" style="display: none;">
+                            <label class="ge-form-label">Quantity:</label>
+                            <input type="number" class="ge-form-input" id="buyQuantity" min="1" value="1">
+                            <div class="ge-quantity-controls">
+                                <button class="ge-qty-btn" data-qty="1">+1</button>
+                                <button class="ge-qty-btn" data-qty="10">+10</button>
+                                <button class="ge-qty-btn" data-qty="100">+100</button>
+                                <button class="ge-qty-btn" data-qty="1000">+1k</button>
+                            </div>
+                        </div>
+
+                        <div class="ge-total-display" id="buyTotal" style="display: none;">
+                            <div class="ge-total-label">Total Cost:</div>
+                            <div class="ge-total-amount"><span id="buyTotalAmount">0</span> <span class="gp">gp</span></div>
+                        </div>
+
+                        <div class="ge-action-buttons" id="buyActions" style="display: none;">
+                            <button class="ge-confirm-btn" id="confirmBuy">Confirm Offer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Sell Offer -->
+                <div class="ge-details-content" id="createSellOffer">
+                    <div class="details-title">🔼 Create Sell Offer</div>
+                    <div class="offer-form">
+                        <div class="ge-form-group">
+                            <label class="ge-form-label">Select item from inventory:</label>
+                            <input type="text" class="ge-item-search" id="sellItemSearch" placeholder="Search your items...">
+                            <div class="ge-item-results" id="sellItemResults"></div>
+                        </div>
+
+                        <div class="ge-form-group" id="sellPriceGroup" style="display: none;">
+                            <label class="ge-form-label">Price per item:</label>
+                            <input type="number" class="ge-form-input" id="sellPrice" min="1" value="1">
+                            <div class="ge-guide-price" id="sellGuidePrice"></div>
+                            <div class="ge-price-controls">
+                                <button class="ge-price-btn" data-action="guide">Guide Price</button>
+                                <button class="ge-price-btn" data-action="-5%">-5%</button>
+                                <button class="ge-price-btn" data-action="-10%">-10%</button>
+                            </div>
+                        </div>
+
+                        <div class="ge-form-group" id="sellQuantityGroup" style="display: none;">
+                            <label class="ge-form-label">Quantity (Available: <span id="sellAvailable">0</span>):</label>
+                            <input type="number" class="ge-form-input" id="sellQuantity" min="1" value="1">
+                            <div class="ge-quantity-controls">
+                                <button class="ge-qty-btn" data-qty="1">+1</button>
+                                <button class="ge-qty-btn" data-qty="10">+10</button>
+                                <button class="ge-qty-btn" data-qty="100">+100</button>
+                                <button class="ge-qty-btn" data-qty="max">All</button>
+                            </div>
+                        </div>
+
+                        <div class="ge-total-display" id="sellTotal" style="display: none;">
+                            <div class="ge-total-label">You'll Receive (after 1% tax):</div>
+                            <div class="ge-total-amount"><span id="sellTotalAmount">0</span> <span class="gp">gp</span></div>
+                            <div class="ge-tax-notice">⚠️ 1% tax will be deducted from sale</div>
+                        </div>
+
+                        <div class="ge-action-buttons" id="sellActions" style="display: none;">
+                            <button class="ge-confirm-btn" id="confirmSell">Confirm Offer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Offer Status -->
+                <div class="ge-details-content" id="viewOffer">
+                    <div class="details-title" id="offerTitle">Offer Status</div>
+                    <div class="ge-offer-status-display" id="offerStatus">
+                        <!-- Status will be dynamically populated -->
+                    </div>
+                    <div class="ge-action-buttons">
+                        <button class="ge-cancel-btn" id="cancelOffer">Cancel Offer</button>
+                    </div>
+                    <button class="ge-collect-btn" id="collectOffer" style="display: none;">Collect Items</button>
                 </div>
             </div>
         </div>
@@ -1618,352 +1942,764 @@ const firebaseConfig = {
             }
         }
 
-        // Player Market Functions
-        let marketRef = null;
-        if (database) {
-            marketRef = database.ref('market/listings');
-        }
-        let selectedItemForSale = null;
 
-        // Open market - find the correct menu item
-        document.querySelectorAll('.menu-item').forEach(item => {
-            const text = item.textContent || item.innerText;
-            if (text.includes('Player market')) {
-                item.addEventListener('click', () => {
-                    if (!isFirebaseConfigured) {
-                        showFloatingText('Player market requires Firebase setup', canvas.width / 2, 100, '#ffaa66');
-                        showFloatingText('You can play as guest without Firebase!', canvas.width / 2, 140, '#8a9aaa');
-                        return;
-                    }
-                    if (isGuestMode) {
-                        showFloatingText('Please sign in with Google to access the market', canvas.width / 2, 100, '#ffaa66');
-                        showFloatingText('Guest mode does not support market features', canvas.width / 2, 140, '#8a9aaa');
-                        return;
-                    }
-                    if (!currentUser) {
-                        showFloatingText('Please login to access the market', canvas.width / 2, 100, '#ff4444');
-                        return;
-                    }
-                    document.getElementById('marketModal').style.display = 'flex';
-                    loadMarketListings();
-                });
+        // ========================================
+        // GRAND EXCHANGE SYSTEM (OSRS-Style)
+        // ========================================
+
+        // Tradeable Resources
+        const TRADEABLE_ITEMS = {
+            'Logs (Tier 1)': { icon: '🪵', basePrice: 10, tier: 1 },
+            'Logs (Tier 2)': { icon: '🪵', basePrice: 25, tier: 2 },
+            'Logs (Tier 3)': { icon: '🪵', basePrice: 50, tier: 3 },
+            'Logs (Tier 4)': { icon: '🪵', basePrice: 75, tier: 4 },
+            'Logs (Tier 5)': { icon: '🪵', basePrice: 100, tier: 5 },
+            'Ore (Tier 1)': { icon: '⛏️', basePrice: 15, tier: 1 },
+            'Ore (Tier 2)': { icon: '⛏️', basePrice: 30, tier: 2 },
+            'Ore (Tier 3)': { icon: '⛏️', basePrice: 60, tier: 3 },
+            'Ore (Tier 4)': { icon: '⛏️', basePrice: 90, tier: 4 },
+            'Ore (Tier 5)': { icon: '⛏️', basePrice: 120, tier: 5 },
+            'Fish (Tier 1)': { icon: '🐟', basePrice: 12, tier: 1 },
+            'Fish (Tier 2)': { icon: '🐟', basePrice: 28, tier: 2 },
+            'Fish (Tier 3)': { icon: '🐟', basePrice: 55, tier: 3 },
+            'Fish (Tier 4)': { icon: '🐟', basePrice: 80, tier: 4 },
+            'Fish (Tier 5)': { icon: '🐟', basePrice: 110, tier: 5 }
+        };
+
+        // Grand Exchange State
+        let playerOffers = {
+            buy: [null, null, null, null],
+            sell: [null, null, null, null]
+        };
+        let guidePrices = {};
+        let selectedSlot = null;
+        let selectedGEItem = null;
+        let selectedGEItemMaxQty = 0;
+        let geListeners = [];
+
+        // Initialize Grand Exchange
+        function initGrandExchange() {
+            if (!isFirebaseConfigured || !database) {
+                console.log('Grand Exchange requires Firebase');
+                return;
             }
-        });
+            
+            loadPlayerOffers();
+            loadGuidePrices();
+            setupGEEventListeners();
+            startOfferMatching();
+        }
 
-        // Close market
-        document.getElementById('closeMarket').addEventListener('click', () => {
-            document.getElementById('marketModal').style.display = 'none';
-        });
+        // Load player's offers from Firebase
+        function loadPlayerOffers() {
+            if (!currentUser) return;
 
-        // Market tab switching
-        document.querySelectorAll('.market-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Remove active from all tabs
-                document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                // Hide all content
-                document.querySelectorAll('.market-tab-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-                
-                // Show selected content
-                const tabName = tab.dataset.tab;
-                if (tabName === 'browse') {
-                    document.getElementById('browseTab').style.display = 'block';
-                    loadMarketListings();
-                } else if (tabName === 'sell') {
-                    document.getElementById('sellTab').style.display = 'block';
-                    populateSellInventory();
-                } else if (tabName === 'mylistings') {
-                    document.getElementById('myListingsTab').style.display = 'block';
-                    loadMyListings();
+            const offersRef = database.ref(`grandExchange/playerOffers/${currentUser.uid}`);
+            offersRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    playerOffers = data;
+                    updateOfferSlots();
                 }
             });
-        });
+        }
 
-        // Populate sell inventory
-        function populateSellInventory() {
-            const grid = document.getElementById('sellInventoryGrid');
-            grid.innerHTML = '';
-            
-            gameState.player.inventory.forEach((item, index) => {
-                if (item && item.quantity > 0) {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'selectable-item';
-                    itemDiv.innerHTML = item.icon || '📦';
-                    itemDiv.title = `${item.name} (${item.quantity})`;
-                    
-                    itemDiv.addEventListener('click', () => {
-                        // Remove selection from all
-                        document.querySelectorAll('.selectable-item').forEach(i => i.classList.remove('selected'));
-                        itemDiv.classList.add('selected');
-                        selectedItemForSale = { ...item, inventoryIndex: index };
-                        document.getElementById('sellQuantity').max = item.quantity;
+        // Load guide prices
+        function loadGuidePrices() {
+            const pricesRef = database.ref('grandExchange/guidePrices');
+            pricesRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    guidePrices = data;
+                } else {
+                    // Initialize with base prices
+                    Object.keys(TRADEABLE_ITEMS).forEach(itemName => {
+                        guidePrices[itemName] = TRADEABLE_ITEMS[itemName].basePrice;
                     });
-                    
-                    grid.appendChild(itemDiv);
+                    database.ref('grandExchange/guidePrices').set(guidePrices);
                 }
             });
         }
 
-        // Create listing
-        document.getElementById('createListingBtn').addEventListener('click', () => {
-            if (!marketRef) {
-                showFloatingText('Market requires Firebase setup', canvas.width / 2, 100, '#ff4444');
-                return;
-            }
-            
-            if (!currentUser) {
-                showFloatingText('Please login first', canvas.width / 2, 100, '#ff4444');
-                return;
-            }
-            
-            if (!selectedItemForSale) {
-                showFloatingText('Please select an item', canvas.width / 2, 100, '#ff4444');
-                return;
-            }
-            
-            const price = parseInt(document.getElementById('sellPrice').value);
-            const quantity = parseInt(document.getElementById('sellQuantity').value);
-            
-            if (!price || price <= 0) {
-                showFloatingText('Please enter a valid price', canvas.width / 2, 100, '#ff4444');
-                return;
-            }
-            
-            if (!quantity || quantity <= 0 || quantity > selectedItemForSale.quantity) {
-                showFloatingText('Invalid quantity', canvas.width / 2, 100, '#ff4444');
-                return;
-            }
-            
-            // Create listing in Firebase
-            const listing = {
-                itemName: selectedItemForSale.name,
-                itemIcon: selectedItemForSale.icon,
-                tier: selectedItemForSale.tier || 1,
-                rarity: selectedItemForSale.rarity || 'common',
-                price: price,
-                quantity: quantity,
-                seller: currentUser.displayName,
-                sellerId: currentUser.uid,
-                timestamp: Date.now()
-            };
-            
-            marketRef.push(listing)
-                .then(() => {
-                    // Remove items from inventory
-                    gameState.player.inventory[selectedItemForSale.inventoryIndex].quantity -= quantity;
-                    if (gameState.player.inventory[selectedItemForSale.inventoryIndex].quantity <= 0) {
-                        gameState.player.inventory[selectedItemForSale.inventoryIndex] = null;
-                    }
-                    updateInventoryDisplay();
+        // Update offer slots display
+        function updateOfferSlots() {
+            ['buy', 'sell'].forEach(type => {
+                playerOffers[type].forEach((offer, index) => {
+                    const slot = document.querySelector(`.offer-slot[data-slot-type="${type}"][data-slot-index="${index}"]`);
+                    if (!slot) return;
                     
-                    showFloatingText('Listing created!', canvas.width / 2, 100, '#5abaaa');
-                    document.getElementById('sellPrice').value = '';
-                    document.getElementById('sellQuantity').value = '1';
-                    selectedItemForSale = null;
-                    populateSellInventory();
-                })
-                .catch(error => {
-                    console.error('Error creating listing:', error);
-                    showFloatingText('Failed to create listing', canvas.width / 2, 100, '#ff4444');
-                });
-        });
-
-        // Load market listings
-        function loadMarketListings(searchTerm = '') {
-            if (!marketRef) {
-                const listingsContainer = document.getElementById('marketListings');
-                listingsContainer.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Market requires Firebase setup</div>';
-                return;
-            }
-            
-            const listingsContainer = document.getElementById('marketListings');
-            listingsContainer.innerHTML = '<div style="color: #8a9aaa; text-align: center; padding: 20px;">Loading...</div>';
-            
-            marketRef.once('value')
-                .then(snapshot => {
-                    listingsContainer.innerHTML = '';
-                    const listings = [];
-                    
-                    snapshot.forEach(childSnapshot => {
-                        const listing = childSnapshot.val();
-                        listing.id = childSnapshot.key;
+                    if (offer) {
+                        slot.classList.remove('empty');
                         
-                        // Filter by search term
-                        if (!searchTerm || listing.itemName.toLowerCase().includes(searchTerm.toLowerCase())) {
-                            listings.push(listing);
+                        if (offer.quantityFilled >= offer.quantity) {
+                            slot.classList.add('completed');
+                            slot.classList.remove('active', 'partial');
+                        } else if (offer.quantityFilled > 0) {
+                            slot.classList.add('partial');
+                            slot.classList.remove('active', 'completed');
+                        } else {
+                            slot.classList.add('active');
+                            slot.classList.remove('partial', 'completed');
                         }
-                    });
-                    
-                    if (listings.length === 0) {
-                        listingsContainer.innerHTML = '<div style="color: #8a9aaa; text-align: center; padding: 20px;">No listings found</div>';
-                        return;
-                    }
-                    
-                    listings.forEach(listing => {
-                        const listingDiv = document.createElement('div');
-                        listingDiv.className = 'market-listing';
-                        
-                        const rarityColors = {
-                            common: '#8a9aaa',
-                            uncommon: '#5abaaa',
-                            rare: '#4a8aff',
-                            epic: '#aa5aff',
-                            perfect: '#ff5aaa',
-                            legendary: '#ffaa5a'
-                        };
-                        
-                        listingDiv.innerHTML = `
-                            <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">
-                                ${listing.itemIcon || '📦'}
-                            </div>
-                            <div class="listing-item-name" style="color: ${rarityColors[listing.rarity] || '#8a9aaa'}">
-                                ${listing.itemName} ${listing.tier ? `(T${listing.tier})` : ''}
-                            </div>
-                            <div class="listing-details">
-                                <div class="listing-price">💰 ${listing.price}g</div>
-                                <div class="listing-quantity">Qty: ${listing.quantity}</div>
-                            </div>
-                            <div class="listing-seller">Seller: ${listing.seller}</div>
-                            ${listing.sellerId !== currentUser?.uid ? 
-                                '<button class="buy-btn" style="margin-top: 10px; width: 100%;">Buy Now</button>' : 
-                                '<div style="color: #8a9aaa; margin-top: 10px; text-align: center; font-size: 12px;">Your Listing</div>'}
+
+                        const icon = TRADEABLE_ITEMS[offer.itemName]?.icon || '📦';
+                        slot.innerHTML = `
+                            <div class="slot-item-icon">${icon}</div>
+                            <div class="slot-item-name">${offer.itemName}</div>
+                            <div class="slot-quantity">${offer.quantityFilled}/${offer.quantity}</div>
+                            <div class="slot-status">${offer.pricePerItem} gp</div>
                         `;
-                        
-                        if (listing.sellerId !== currentUser?.uid) {
-                            listingDiv.querySelector('.buy-btn').addEventListener('click', () => {
-                                buyListing(listing);
-                            });
-                        }
-                        
-                        listingsContainer.appendChild(listingDiv);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading listings:', error);
-                    listingsContainer.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Error loading listings</div>';
+                    } else {
+                        slot.classList.add('empty');
+                        slot.classList.remove('active', 'partial', 'completed');
+                        slot.innerHTML = '';
+                    }
                 });
+            });
         }
 
-        // Buy listing
-        function buyListing(listing) {
-            if (!marketRef) {
-                showFloatingText('Market requires Firebase setup', canvas.width / 2, 100, '#ff4444');
+        // Setup event listeners
+        function setupGEEventListeners() {
+            // Slot clicks
+            document.querySelectorAll('.offer-slot').forEach(slot => {
+                slot.addEventListener('click', () => handleSlotClick(slot));
+            });
+
+            // Close button
+            document.getElementById('closeGE').addEventListener('click', () => {
+                document.getElementById('grandExchangeModal').style.display = 'none';
+            });
+
+            // Buy offer form
+            setupBuyOfferForm();
+            
+            // Sell offer form
+            setupSellOfferForm();
+            
+            // Cancel/collect buttons
+            document.getElementById('cancelOffer').addEventListener('click', handleCancelOffer);
+            document.getElementById('collectOffer').addEventListener('click', handleCollectOffer);
+        }
+
+        // Handle slot click
+        function handleSlotClick(slot) {
+            const type = slot.dataset.slotType;
+            const index = parseInt(slot.dataset.slotIndex);
+            selectedSlot = { type, index };
+
+            const offer = playerOffers[type][index];
+
+            document.querySelectorAll('.ge-details-content').forEach(el => el.classList.remove('active'));
+
+            if (offer) {
+                displayOfferStatus(offer, type, index);
+                document.getElementById('viewOffer').classList.add('active');
+            } else {
+                if (type === 'buy') {
+                    resetBuyForm();
+                    document.getElementById('createBuyOffer').classList.add('active');
+                } else {
+                    resetSellForm();
+                    loadGEInventory();
+                    document.getElementById('createSellOffer').classList.add('active');
+                }
+            }
+        }
+
+        // Setup buy offer form
+        function setupBuyOfferForm() {
+            const searchInput = document.getElementById('buyItemSearch');
+            const resultsDiv = document.getElementById('buyItemResults');
+            const priceInput = document.getElementById('buyPrice');
+            const quantityInput = document.getElementById('buyQuantity');
+
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                if (query.length === 0) {
+                    resultsDiv.innerHTML = '';
+                    return;
+                }
+
+                const results = Object.keys(TRADEABLE_ITEMS).filter(name => 
+                    name.toLowerCase().includes(query)
+                );
+
+                resultsDiv.innerHTML = results.map(itemName => {
+                    const item = TRADEABLE_ITEMS[itemName];
+                    const guidePrice = guidePrices[itemName] || item.basePrice;
+                    return `
+                        <div class="ge-item-result" data-item="${itemName}">
+                            <div class="ge-item-result-icon">${item.icon}</div>
+                            <div class="ge-item-result-info">
+                                <div class="ge-item-result-name">${itemName}</div>
+                                <div class="ge-item-result-price">Guide: ${guidePrice} gp</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                resultsDiv.querySelectorAll('.ge-item-result').forEach(result => {
+                    result.addEventListener('click', () => {
+                        selectBuyItem(result.dataset.item);
+                    });
+                });
+            });
+
+            // Price controls
+            document.querySelectorAll('#createBuyOffer .ge-price-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.dataset.action;
+                    if (!selectedGEItem) return;
+                    
+                    const guidePrice = guidePrices[selectedGEItem] || TRADEABLE_ITEMS[selectedGEItem].basePrice;
+                    
+                    if (action === 'guide') {
+                        priceInput.value = guidePrice;
+                    } else if (action === '5%') {
+                        priceInput.value = Math.ceil(guidePrice * 1.05);
+                    } else if (action === '10%') {
+                        priceInput.value = Math.ceil(guidePrice * 1.10);
+                    }
+                    updateBuyTotal();
+                });
+            });
+
+            // Quantity controls
+            document.querySelectorAll('#createBuyOffer .ge-qty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const qty = parseInt(btn.dataset.qty);
+                    quantityInput.value = parseInt(quantityInput.value) + qty;
+                    updateBuyTotal();
+                });
+            });
+
+            priceInput.addEventListener('input', updateBuyTotal);
+            quantityInput.addEventListener('input', updateBuyTotal);
+
+            document.getElementById('confirmBuy').addEventListener('click', confirmBuyOffer);
+        }
+
+        // Select buy item
+        function selectBuyItem(itemName) {
+            selectedGEItem = itemName;
+            const item = TRADEABLE_ITEMS[itemName];
+            const guidePrice = guidePrices[itemName] || item.basePrice;
+
+            document.getElementById('buyItemSearch').value = itemName;
+            document.getElementById('buyItemResults').innerHTML = '';
+            document.getElementById('buyPrice').value = guidePrice;
+            document.getElementById('buyGuidePrice').textContent = `Guide price: ${guidePrice} gp`;
+            
+            document.getElementById('buyPriceGroup').style.display = 'block';
+            document.getElementById('buyQuantityGroup').style.display = 'block';
+            document.getElementById('buyTotal').style.display = 'block';
+            document.getElementById('buyActions').style.display = 'flex';
+
+            updateBuyTotal();
+        }
+
+        // Update buy total
+        function updateBuyTotal() {
+            const price = parseInt(document.getElementById('buyPrice').value) || 0;
+            const quantity = parseInt(document.getElementById('buyQuantity').value) || 0;
+            const total = price * quantity;
+            document.getElementById('buyTotalAmount').textContent = total.toLocaleString();
+        }
+
+        // Confirm buy offer
+        async function confirmBuyOffer() {
+            if (!selectedSlot || !selectedGEItem) return;
+
+            const price = parseInt(document.getElementById('buyPrice').value);
+            const quantity = parseInt(document.getElementById('buyQuantity').value);
+            const total = price * quantity;
+
+            if (price <= 0 || quantity <= 0) {
+                showFloatingText('Invalid price or quantity', canvas.width / 2, 100, '#ff4444');
                 return;
             }
-            
-            if (gameState.player.gold < listing.price) {
+
+            if (gameState.player.gold < total) {
                 showFloatingText('Not enough gold!', canvas.width / 2, 100, '#ff4444');
                 return;
             }
-            
+
             // Deduct gold
-            gameState.player.gold -= listing.price;
-            
-            // Add item to inventory
-            addItemToInventory({
-                name: listing.itemName,
-                icon: listing.itemIcon,
-                tier: listing.tier,
-                rarity: listing.rarity,
-                quantity: listing.quantity
+            gameState.player.gold -= total;
+
+            const offer = {
+                itemName: selectedGEItem,
+                pricePerItem: price,
+                quantity: quantity,
+                quantityFilled: 0,
+                type: 'buy',
+                playerId: currentUser.uid,
+                playerName: currentUser.email ? currentUser.email.split('@')[0] : 'Player',
+                timestamp: Date.now(),
+                status: 'active',
+                collectedItems: 0,
+                goldSpent: total
+            };
+
+            playerOffers.buy[selectedSlot.index] = offer;
+            await database.ref(`grandExchange/playerOffers/${currentUser.uid}`).set(playerOffers);
+
+            const offerRef = database.ref('grandExchange/activeOffers/buy').push();
+            await offerRef.set({
+                ...offer,
+                offerId: offerRef.key,
+                slotIndex: selectedSlot.index
             });
+
+            resetBuyForm();
+            showFloatingText('Buy offer created!', canvas.width / 2, 100, '#00ff00');
             
-            // Remove listing from Firebase
-            marketRef.child(listing.id).remove()
-                .then(() => {
-                    // Add gold to seller (would need a more complete system)
-                    showFloatingText(`Purchased ${listing.itemName}!`, canvas.width / 2, 100, '#5abaaa');
-                    loadMarketListings();
-                })
-                .catch(error => {
-                    console.error('Error completing purchase:', error);
-                    showFloatingText('Purchase failed', canvas.width / 2, 100, '#ff4444');
-                });
+            document.querySelectorAll('.ge-details-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('emptyState').classList.add('active');
         }
 
-        // Load my listings
-        function loadMyListings() {
-            if (!currentUser) return;
+        // Reset buy form
+        function resetBuyForm() {
+            document.getElementById('buyItemSearch').value = '';
+            document.getElementById('buyItemResults').innerHTML = '';
+            document.getElementById('buyPriceGroup').style.display = 'none';
+            document.getElementById('buyQuantityGroup').style.display = 'none';
+            document.getElementById('buyTotal').style.display = 'none';
+            document.getElementById('buyActions').style.display = 'none';
+            selectedGEItem = null;
+        }
+
+        // Setup sell offer form
+        function setupSellOfferForm() {
+            const searchInput = document.getElementById('sellItemSearch');
+            const resultsDiv = document.getElementById('sellItemResults');
+            const priceInput = document.getElementById('sellPrice');
+            const quantityInput = document.getElementById('sellQuantity');
+
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                loadGEInventory(query);
+            });
+
+            // Price controls
+            document.querySelectorAll('#createSellOffer .ge-price-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.dataset.action;
+                    if (!selectedGEItem) return;
+                    
+                    const guidePrice = guidePrices[selectedGEItem] || TRADEABLE_ITEMS[selectedGEItem].basePrice;
+                    
+                    if (action === 'guide') {
+                        priceInput.value = guidePrice;
+                    } else if (action === '-5%') {
+                        priceInput.value = Math.floor(guidePrice * 0.95);
+                    } else if (action === '-10%') {
+                        priceInput.value = Math.floor(guidePrice * 0.90);
+                    }
+                    updateSellTotal();
+                });
+            });
+
+            // Quantity controls
+            document.querySelectorAll('#createSellOffer .ge-qty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.dataset.qty === 'max') {
+                        quantityInput.value = selectedGEItemMaxQty;
+                    } else {
+                        const qty = parseInt(btn.dataset.qty);
+                        const current = parseInt(quantityInput.value) || 0;
+                        quantityInput.value = Math.min(current + qty, selectedGEItemMaxQty);
+                    }
+                    updateSellTotal();
+                });
+            });
+
+            priceInput.addEventListener('input', updateSellTotal);
+            quantityInput.addEventListener('input', () => {
+                const val = parseInt(quantityInput.value) || 0;
+                quantityInput.value = Math.min(val, selectedGEItemMaxQty);
+                updateSellTotal();
+            });
+
+            document.getElementById('confirmSell').addEventListener('click', confirmSellOffer);
+        }
+
+        // Load inventory for GE
+        function loadGEInventory(searchQuery = '') {
+            const resultsDiv = document.getElementById('sellItemResults');
             
-            if (!marketRef) {
-                const listingsContainer = document.getElementById('myListingsGrid');
-                listingsContainer.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Market requires Firebase setup</div>';
+            // Filter inventory for tradeable items
+            const tradeableInventory = gameState.player.inventory.filter(item => {
+                if (!item) return false;
+                const itemKey = `${item.name} (Tier ${item.tier || 1})`;
+                return TRADEABLE_ITEMS[itemKey] && 
+                       (!searchQuery || itemKey.toLowerCase().includes(searchQuery.toLowerCase()));
+            });
+
+            if (tradeableInventory.length === 0) {
+                resultsDiv.innerHTML = '<div style="padding: 20px; color: #8a7a6a; text-align: center;">No tradeable items</div>';
                 return;
             }
-            
-            const listingsContainer = document.getElementById('myListingsGrid');
-            listingsContainer.innerHTML = '<div style="color: #8a9aaa; text-align: center; padding: 20px;">Loading...</div>';
-            
-            marketRef.orderByChild('sellerId').equalTo(currentUser.uid).once('value')
-                .then(snapshot => {
-                    listingsContainer.innerHTML = '';
-                    
-                    if (!snapshot.exists()) {
-                        listingsContainer.innerHTML = '<div style="color: #8a9aaa; text-align: center; padding: 20px;">You have no active listings</div>';
-                        return;
-                    }
-                    
-                    snapshot.forEach(childSnapshot => {
-                        const listing = childSnapshot.val();
-                        listing.id = childSnapshot.key;
-                        
-                        const listingDiv = document.createElement('div');
-                        listingDiv.className = 'market-listing';
-                        
-                        listingDiv.innerHTML = `
-                            <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">
-                                ${listing.itemIcon || '📦'}
-                            </div>
-                            <div class="listing-item-name">
-                                ${listing.itemName} ${listing.tier ? `(T${listing.tier})` : ''}
-                            </div>
-                            <div class="listing-details">
-                                <div class="listing-price">💰 ${listing.price}g</div>
-                                <div class="listing-quantity">Qty: ${listing.quantity}</div>
-                            </div>
-                            <button class="buy-btn" style="margin-top: 10px; width: 100%; background: linear-gradient(135deg, #8a4a4a, #6a3a3a);">Cancel Listing</button>
-                        `;
-                        
-                        listingDiv.querySelector('.buy-btn').addEventListener('click', () => {
-                            marketRef.child(listing.id).remove()
-                                .then(() => {
-                                    // Return items to inventory
-                                    addItemToInventory({
-                                        name: listing.itemName,
-                                        icon: listing.itemIcon,
-                                        tier: listing.tier,
-                                        rarity: listing.rarity,
-                                        quantity: listing.quantity
-                                    });
-                                    showFloatingText('Listing cancelled', canvas.width / 2, 100, '#8a9aaa');
-                                    loadMyListings();
-                                })
-                                .catch(error => {
-                                    console.error('Error cancelling listing:', error);
-                                    showFloatingText('Failed to cancel', canvas.width / 2, 100, '#ff4444');
-                                });
-                        });
-                        
-                        listingsContainer.appendChild(listingDiv);
-                    });
+
+            resultsDiv.innerHTML = tradeableInventory.map(item => {
+                const itemKey = `${item.name} (Tier ${item.tier || 1})`;
+                const itemData = TRADEABLE_ITEMS[itemKey];
+                const guidePrice = guidePrices[itemKey] || itemData.basePrice;
+                
+                return `
+                    <div class="ge-item-result" data-item="${itemKey}" data-quantity="${item.quantity}">
+                        <div class="ge-item-result-icon">${itemData.icon}</div>
+                        <div class="ge-item-result-info">
+                            <div class="ge-item-result-name">${itemKey} (${item.quantity})</div>
+                            <div class="ge-item-result-price">Guide: ${guidePrice} gp</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            resultsDiv.querySelectorAll('.ge-item-result').forEach(result => {
+                result.addEventListener('click', () => {
+                    selectSellItem(result.dataset.item, parseInt(result.dataset.quantity));
                 });
+            });
         }
 
-        // Search market
-        document.getElementById('searchMarketBtn').addEventListener('click', () => {
-            const searchTerm = document.getElementById('marketSearch').value;
-            loadMarketListings(searchTerm);
-        });
+        // Select sell item
+        function selectSellItem(itemName, availableQty) {
+            selectedGEItem = itemName;
+            selectedGEItemMaxQty = availableQty;
+            const item = TRADEABLE_ITEMS[itemName];
+            const guidePrice = guidePrices[itemName] || item.basePrice;
 
-        document.getElementById('marketSearch').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const searchTerm = document.getElementById('marketSearch').value;
-                loadMarketListings(searchTerm);
+            document.getElementById('sellItemSearch').value = itemName;
+            document.getElementById('sellAvailable').textContent = availableQty;
+            document.getElementById('sellPrice').value = guidePrice;
+            document.getElementById('sellQuantity').max = availableQty;
+            document.getElementById('sellQuantity').value = 1;
+            document.getElementById('sellGuidePrice').textContent = `Guide price: ${guidePrice} gp`;
+            
+            document.getElementById('sellPriceGroup').style.display = 'block';
+            document.getElementById('sellQuantityGroup').style.display = 'block';
+            document.getElementById('sellTotal').style.display = 'block';
+            document.getElementById('sellActions').style.display = 'flex';
+
+            updateSellTotal();
+        }
+
+        // Update sell total
+        function updateSellTotal() {
+            const price = parseInt(document.getElementById('sellPrice').value) || 0;
+            const quantity = parseInt(document.getElementById('sellQuantity').value) || 0;
+            const total = price * quantity;
+            const afterTax = Math.floor(total * 0.99);
+            document.getElementById('sellTotalAmount').textContent = afterTax.toLocaleString();
+        }
+
+        // Confirm sell offer
+        async function confirmSellOffer() {
+            if (!selectedSlot || !selectedGEItem) return;
+
+            const price = parseInt(document.getElementById('sellPrice').value);
+            const quantity = parseInt(document.getElementById('sellQuantity').value);
+
+            if (price <= 0 || quantity <= 0) {
+                showFloatingText('Invalid price or quantity', canvas.width / 2, 100, '#ff4444');
+                return;
             }
-        });
+
+            // Remove items from inventory
+            const itemIndex = gameState.player.inventory.findIndex(item => 
+                item && `${item.name} (Tier ${item.tier || 1})` === selectedGEItem
+            );
+
+            if (itemIndex === -1 || gameState.player.inventory[itemIndex].quantity < quantity) {
+                showFloatingText('Not enough items!', canvas.width / 2, 100, '#ff4444');
+                return;
+            }
+
+            gameState.player.inventory[itemIndex].quantity -= quantity;
+            if (gameState.player.inventory[itemIndex].quantity <= 0) {
+                gameState.player.inventory[itemIndex] = null;
+            }
+
+            const offer = {
+                itemName: selectedGEItem,
+                pricePerItem: price,
+                quantity: quantity,
+                quantityFilled: 0,
+                type: 'sell',
+                playerId: currentUser.uid,
+                playerName: currentUser.email ? currentUser.email.split('@')[0] : 'Player',
+                timestamp: Date.now(),
+                status: 'active',
+                collectedGold: 0
+            };
+
+            playerOffers.sell[selectedSlot.index] = offer;
+            await database.ref(`grandExchange/playerOffers/${currentUser.uid}`).set(playerOffers);
+
+            const offerRef = database.ref('grandExchange/activeOffers/sell').push();
+            await offerRef.set({
+                ...offer,
+                offerId: offerRef.key,
+                slotIndex: selectedSlot.index
+            });
+
+            resetSellForm();
+            showFloatingText('Sell offer created!', canvas.width / 2, 100, '#00ff00');
+            
+            document.querySelectorAll('.ge-details-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('emptyState').classList.add('active');
+        }
+
+        // Reset sell form
+        function resetSellForm() {
+            document.getElementById('sellItemSearch').value = '';
+            document.getElementById('sellItemResults').innerHTML = '';
+            document.getElementById('sellPriceGroup').style.display = 'none';
+            document.getElementById('sellQuantityGroup').style.display = 'none';
+            document.getElementById('sellTotal').style.display = 'none';
+            document.getElementById('sellActions').style.display = 'none';
+            selectedGEItem = null;
+            selectedGEItemMaxQty = 0;
+        }
+
+        // Display offer status
+        function displayOfferStatus(offer, type, index) {
+            const statusDiv = document.getElementById('offerStatus');
+            const percentage = (offer.quantityFilled / offer.quantity * 100).toFixed(0);
+            
+            statusDiv.innerHTML = `
+                <div class="ge-status-row">
+                    <span class="ge-status-label">Item:</span>
+                    <span class="ge-status-value">${offer.itemName}</span>
+                </div>
+                <div class="ge-status-row">
+                    <span class="ge-status-label">Type:</span>
+                    <span class="ge-status-value">${type === 'buy' ? '🔽 Buying' : '🔼 Selling'}</span>
+                </div>
+                <div class="ge-status-row">
+                    <span class="ge-status-label">Price per item:</span>
+                    <span class="ge-status-value">${offer.pricePerItem} gp</span>
+                </div>
+                <div class="ge-status-row">
+                    <span class="ge-status-label">Progress:</span>
+                    <span class="ge-status-value">${offer.quantityFilled} / ${offer.quantity}</span>
+                </div>
+                <div class="ge-progress-bar">
+                    <div class="ge-progress-fill" style="width: ${percentage}%"></div>
+                    <div class="ge-progress-text">${percentage}%</div>
+                </div>
+            `;
+
+            if (offer.quantityFilled >= offer.quantity) {
+                document.getElementById('collectOffer').style.display = 'block';
+            } else {
+                document.getElementById('collectOffer').style.display = 'none';
+            }
+        }
+
+        // Handle cancel offer
+        async function handleCancelOffer() {
+            if (!selectedSlot) return;
+
+            const { type, index } = selectedSlot;
+            const offer = playerOffers[type][index];
+
+            if (!offer) return;
+
+            if (!confirm('Cancel this offer? Partial fills will be returned.')) return;
+
+            // Return items/gold for partial fills
+            if (type === 'buy') {
+                const unfilled = offer.quantity - offer.quantityFilled;
+                const goldToReturn = unfilled * offer.pricePerItem;
+                gameState.player.gold += goldToReturn;
+                
+                // Return filled items
+                if (offer.quantityFilled > 0) {
+                    addItemToInventory({
+                        name: offer.itemName.split(' (')[0],
+                        tier: TRADEABLE_ITEMS[offer.itemName].tier,
+                        quantity: offer.quantityFilled,
+                        icon: TRADEABLE_ITEMS[offer.itemName].icon
+                    });
+                }
+            } else {
+                // Return unsold items
+                const unsold = offer.quantity - offer.quantityFilled;
+                if (unsold > 0) {
+                    addItemToInventory({
+                        name: offer.itemName.split(' (')[0],
+                        tier: TRADEABLE_ITEMS[offer.itemName].tier,
+                        quantity: unsold,
+                        icon: TRADEABLE_ITEMS[offer.itemName].icon
+                    });
+                }
+                
+                // Return collected gold
+                if (offer.collectedGold > 0) {
+                    gameState.player.gold += offer.collectedGold;
+                }
+            }
+
+            // Remove from active offers
+            const activeOffersRef = database.ref(`grandExchange/activeOffers/${type}`);
+            const snapshot = await activeOffersRef.once('value');
+            snapshot.forEach(child => {
+                if (child.val().playerId === currentUser.uid && child.val().slotIndex === index) {
+                    child.ref.remove();
+                }
+            });
+
+            playerOffers[type][index] = null;
+            await database.ref(`grandExchange/playerOffers/${currentUser.uid}`).set(playerOffers);
+
+            showFloatingText('Offer cancelled', canvas.width / 2, 100, '#ffaa66');
+            
+            document.querySelectorAll('.ge-details-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('emptyState').classList.add('active');
+        }
+
+        // Handle collect offer
+        async function handleCollectOffer() {
+            if (!selectedSlot) return;
+
+            const { type, index } = selectedSlot;
+            const offer = playerOffers[type][index];
+
+            if (!offer || offer.quantityFilled < offer.quantity) return;
+
+            if (type === 'buy') {
+                // Add items to inventory
+                addItemToInventory({
+                    name: offer.itemName.split(' (')[0],
+                    tier: TRADEABLE_ITEMS[offer.itemName].tier,
+                    quantity: offer.quantityFilled,
+                    icon: TRADEABLE_ITEMS[offer.itemName].icon
+                });
+                showFloatingText(`Collected ${offer.quantityFilled}x ${offer.itemName}!`, canvas.width / 2, 100, '#FFD700');
+            } else {
+                // Add gold
+                const goldReceived = Math.floor(offer.pricePerItem * offer.quantityFilled * 0.99);
+                gameState.player.gold += goldReceived;
+                showFloatingText(`Collected ${goldReceived} gold!`, canvas.width / 2, 100, '#FFD700');
+            }
+
+            // Clear the offer
+            playerOffers[type][index] = null;
+            await database.ref(`grandExchange/playerOffers/${currentUser.uid}`).set(playerOffers);
+
+            document.querySelectorAll('.ge-details-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('emptyState').classList.add('active');
+        }
+
+        // Start automatic matching system
+        function startOfferMatching() {
+            database.ref('grandExchange/activeOffers/buy').on('child_added', matchBuyOffer);
+            database.ref('grandExchange/activeOffers/sell').on('child_added', matchSellOffer);
+        }
+
+        // Match buy offers
+        async function matchBuyOffer(buySnapshot) {
+            const buyOffer = buySnapshot.val();
+            
+            if (buyOffer.quantityFilled >= buyOffer.quantity) return;
+
+            const sellOffersRef = database.ref('grandExchange/activeOffers/sell');
+            const sellSnapshot = await sellOffersRef.orderByChild('itemName').equalTo(buyOffer.itemName).once('value');
+
+            sellSnapshot.forEach(async (sellSnap) => {
+                const sellOffer = sellSnap.val();
+                
+                if (sellOffer.pricePerItem <= buyOffer.pricePerItem && 
+                    sellOffer.quantityFilled < sellOffer.quantity) {
+                    
+                    const buyerNeed = buyOffer.quantity - buyOffer.quantityFilled;
+                    const sellerHas = sellOffer.quantity - sellOffer.quantityFilled;
+                    const tradeQty = Math.min(buyerNeed, sellerHas);
+
+                    await executeTrade(buyOffer, sellOffer, tradeQty, buySnapshot.key, sellSnap.key);
+                }
+            });
+        }
+
+        // Match sell offers
+        async function matchSellOffer(sellSnapshot) {
+            const sellOffer = sellSnapshot.val();
+            
+            if (sellOffer.quantityFilled >= sellOffer.quantity) return;
+
+            const buyOffersRef = database.ref('grandExchange/activeOffers/buy');
+            const buySnapshot = await buyOffersRef.orderByChild('itemName').equalTo(sellOffer.itemName).once('value');
+
+            buySnapshot.forEach(async (buySnap) => {
+                const buyOffer = buySnap.val();
+                
+                if (buyOffer.pricePerItem >= sellOffer.pricePerItem && 
+                    buyOffer.quantityFilled < buyOffer.quantity) {
+                    
+                    const buyerNeed = buyOffer.quantity - buyOffer.quantityFilled;
+                    const sellerHas = sellOffer.quantity - sellOffer.quantityFilled;
+                    const tradeQty = Math.min(buyerNeed, sellerHas);
+
+                    await executeTrade(buyOffer, sellOffer, tradeQty, buySnap.key, sellSnapshot.key);
+                }
+            });
+        }
+
+        // Execute trade
+        async function executeTrade(buyOffer, sellOffer, quantity, buyOfferId, sellOfferId) {
+            buyOffer.quantityFilled += quantity;
+            sellOffer.quantityFilled += quantity;
+
+            const sellerReceives = Math.floor(sellOffer.pricePerItem * quantity * 0.99);
+
+            // Update player offers
+            await database.ref(`grandExchange/playerOffers/${buyOffer.playerId}/buy/${buyOffer.slotIndex}`).update({
+                quantityFilled: buyOffer.quantityFilled
+            });
+
+            await database.ref(`grandExchange/playerOffers/${sellOffer.playerId}/sell/${sellOffer.slotIndex}`).update({
+                quantityFilled: sellOffer.quantityFilled,
+                collectedGold: firebase.database.ServerValue.increment(sellerReceives)
+            });
+
+            // Update active offers
+            await database.ref(`grandExchange/activeOffers/buy/${buyOfferId}`).update({
+                quantityFilled: buyOffer.quantityFilled
+            });
+
+            await database.ref(`grandExchange/activeOffers/sell/${sellOfferId}`).update({
+                quantityFilled: sellOffer.quantityFilled
+            });
+
+            // Update guide price
+            const currentGuide = guidePrices[buyOffer.itemName] || TRADEABLE_ITEMS[buyOffer.itemName].basePrice;
+            const transactionPrice = (buyOffer.pricePerItem + sellOffer.pricePerItem) / 2;
+            const newGuide = Math.floor((currentGuide * 0.9) + (transactionPrice * 0.1));
+            
+            await database.ref(`grandExchange/guidePrices/${buyOffer.itemName}`).set(newGuide);
+
+            // Record trade
+            await database.ref('grandExchange/tradeHistory').push({
+                itemName: buyOffer.itemName,
+                quantity: quantity,
+                price: transactionPrice,
+                buyerId: buyOffer.playerId,
+                sellerId: sellOffer.playerId,
+                timestamp: Date.now()
+            });
+
+            // Remove completed offers
+            if (buyOffer.quantityFilled >= buyOffer.quantity) {
+                await database.ref(`grandExchange/activeOffers/buy/${buyOfferId}`).remove();
+            }
+            if (sellOffer.quantityFilled >= sellOffer.quantity) {
+                await database.ref(`grandExchange/activeOffers/sell/${sellOfferId}`).remove();
+            }
+        }
+
 
         // Load sprites
         const spriteUrls = {
@@ -3452,6 +4188,27 @@ const firebaseConfig = {
                 gameState.player.targetX = null;
                 gameState.player.targetY = null;
                 gameState.player.isPerformingAction = false;
+            }
+        });
+
+        // Grand Exchange / Player Market menu handler
+        document.querySelectorAll('.menu-item').forEach(item => {
+            const text = item.textContent.trim();
+            if (text === 'Player market') {
+                item.addEventListener('click', () => {
+                    if (isFirebaseConfigured && database) {
+                        if (!currentUser || isGuestMode) {
+                            showFloatingText('Grand Exchange requires sign-in', canvas.width / 2, 100, '#ffaa66');
+                        } else {
+                            document.getElementById('grandExchangeModal').style.display = 'flex';
+                            if (!playerOffers.buy) {
+                                initGrandExchange();
+                            }
+                        }
+                    } else {
+                        showFloatingText('Grand Exchange requires Firebase setup', canvas.width / 2, 100, '#ff4444');
+                    }
+                });
             }
         });
 
