@@ -2397,19 +2397,17 @@
 
                         <!-- Action Buttons -->
                         <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <button id="pvmStatsBtn" style="padding: 12px; background: linear-gradient(135deg, #2a5a8a, #1a4a7a); border: 2px solid #3a6a9a; border-radius: 8px; color: #5abaaa; cursor: pointer; font-weight: bold; transition: all 0.3s;">📊 PvM stats</button>
                             <button id="recruitmentCenterBtn" style="padding: 12px; background: linear-gradient(135deg, #2a5a8a, #1a4a7a); border: 2px solid #3a6a9a; border-radius: 8px; color: #5abaaa; cursor: pointer; font-weight: bold; transition: all 0.3s;">👥 Recruitment center</button>
                             <button id="bulletinBoardBtn" style="padding: 12px; background: linear-gradient(135deg, #2a5a8a, #1a4a7a); border: 2px solid #3a6a9a; border-radius: 8px; color: #5abaaa; cursor: pointer; font-weight: bold; transition: all 0.3s;">📌 Bulletin board</button>
                             <button id="leaveClanPageBtn" style="padding: 12px; background: linear-gradient(135deg, #8a2a2a, #7a1a1a); border: 2px solid #9a3a3a; border-radius: 8px; color: #ff6666; cursor: pointer; font-weight: bold; transition: all 0.3s;">🚪 Leave clan</button>
                         </div>
                     </div>
 
-                    <!-- Right Side - Total Level Display -->
-                    <div style="display: flex; align-items: center; justify-content: center;">
-                        <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 40px; text-align: center;">
-                            <div style="color: #8a9aaa; font-size: 18px; margin-bottom: 15px;">Clan Total Level</div>
-                            <div id="clanTotalLevel" style="color: #5abaaa; font-size: 72px; font-weight: bold; text-shadow: 0 0 20px rgba(90, 186, 170, 0.5);">0</div>
-                            <div style="color: #6a7a8a; font-size: 14px; margin-top: 15px;">Combined level of all members</div>
+                    <!-- Right Side - Skills with Progress Bars -->
+                    <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 20px; overflow-y: auto;">
+                        <div style="color: #5abaaa; font-size: 18px; font-weight: bold; margin-bottom: 20px;">Clan Skills</div>
+                        <div id="clanSkillsList" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            <!-- Skills will be populated here -->
                         </div>
                     </div>
                 </div>
@@ -2421,19 +2419,21 @@
             </div>
             <div id="tab-storage" class="clan-tab-content" style="display: none;">
                 <!-- Storage/Vault Interface -->
-                <div style="max-width: 800px; margin: 0 auto;">
+                <div style="max-width: 900px; margin: 0 auto;">
                     <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
                         <div style="color: #5abaaa; font-size: 20px; font-weight: bold; margin-bottom: 10px;">🏦 Clan Vault</div>
-                        <div style="color: #8a9aaa; font-size: 12px;">Purchased space: <span id="purchasedSpaceTab">0</span>/200 • Total space: <span id="totalSpaceTab">0</span>/8</div>
+                        <div style="color: #8a9aaa; font-size: 12px;">Total space: <span id="totalSpaceTab">0</span>/16</div>
                     </div>
                     
                     <div style="background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 10px; padding: 20px;">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div class="coin-icon" style="width: 24px; height: 24px;"></div>
-                                <span id="clanGoldTab" style="color: #FFD700; font-weight: bold; font-size: 18px;">0</span>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="coin-icon" style="width: 24px; height: 24px;"></div>
+                                    <span id="clanGoldTab" style="color: #FFD700; font-weight: bold; font-size: 18px;">0</span>
+                                </div>
+                                <button id="addMoneyBtn" style="padding: 8px 16px; background: linear-gradient(135deg, #5a8a2a, #4a7a1a); border: 2px solid #6a9a3a; border-radius: 8px; color: #aafa5a; cursor: pointer; font-weight: bold;">💰 Add Money</button>
                             </div>
-                            <button id="manageStorageBtnTab" style="padding: 10px 20px; background: linear-gradient(135deg, #2a5a8a, #1a4a7a); border: 2px solid #3a6a9a; border-radius: 8px; color: #5abaaa; cursor: pointer; font-weight: bold;">⚙️ Manage</button>
                         </div>
                         <div id="clanStorageGridTab" style="display: grid; grid-template-columns: repeat(8, 60px); gap: 5px; padding: 10px; background: rgba(0,0,0,0.3); border: 2px solid #2a4a5a; border-radius: 8px; min-height: 400px;">
                             <!-- Storage slots will be generated here -->
@@ -2455,7 +2455,7 @@
         <div style="background: linear-gradient(135deg, rgba(26, 35, 50, 0.95), rgba(15, 22, 32, 0.95)); border-bottom: 3px solid #2a4a5a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <div style="color: #5abaaa; font-size: 20px; font-weight: bold;">🏦 Vault</div>
-                <div style="color: #8a9aaa; font-size: 12px; margin-top: 5px;">Purchased space: <span id="purchasedSpace">0</span>/200 • Total space: <span id="totalSpace">0</span>/8</div>
+                <div style="color: #8a9aaa; font-size: 12px; margin-top: 5px;">Total space: <span id="totalSpace">0</span>/16</div>
             </div>
             <button id="closeClanStorage" style="background: #3a2a2a; color: #fff; border: none; padding: 10px 15px; cursor: pointer; border-radius: 8px; font-size: 18px;">✖</button>
         </div>
@@ -3402,8 +3402,8 @@ const firebaseConfig = {
             document.getElementById('clanMemberCount').textContent = clanData.memberCount || 0;
             document.getElementById('memberCountDisplay').textContent = clanData.memberCount || 0;
             
-            // Calculate clan total level from all members
-            await updateClanTotalLevel();
+            // Calculate and display clan skills
+            await updateClanSkillsDisplay();
 
             // Load clan members
             await loadClanMembers();
@@ -3419,21 +3419,21 @@ const firebaseConfig = {
             document.getElementById('clanPageModal').style.display = 'block';
         }
 
-        // Update clan total level
-        async function updateClanTotalLevel() {
+        // Update clan skills display with progress bars
+        async function updateClanSkillsDisplay() {
             if (!playerProfile.clanId || !database) return;
 
             const membersRef = database.ref(`clans/${playerProfile.clanId}/members`);
             const membersSnapshot = await membersRef.once('value');
             
-            let totalLevel = 0;
+            const skillTotals = {};
+            const maxPerSkill = 495; // 99 * 5 members
             
             if (membersSnapshot.exists()) {
                 const memberPromises = [];
                 
                 membersSnapshot.forEach((memberSnap) => {
                     const memberId = memberSnap.key;
-                    // Fetch each member's skills
                     const playerSkillsPromise = database.ref(`players/${memberId}/skills`).once('value');
                     memberPromises.push(playerSkillsPromise);
                 });
@@ -3443,13 +3443,59 @@ const firebaseConfig = {
                 skillSnapshots.forEach((skillSnapshot) => {
                     if (skillSnapshot.exists()) {
                         const skills = skillSnapshot.val();
-                        const playerTotal = Object.values(skills).reduce((sum, level) => sum + (level || 0), 0);
-                        totalLevel += playerTotal;
+                        for (const [skillName, level] of Object.entries(skills)) {
+                            skillTotals[skillName] = (skillTotals[skillName] || 0) + (level || 0);
+                        }
                     }
                 });
             }
             
-            document.getElementById('clanTotalLevel').textContent = totalLevel;
+            // Filter out PVM stats (combat skills)
+            const pvmSkills = ['hitpoints', 'attack', 'strength', 'defence', 'ranged', 'magic', 'combat'];
+            for (const pvmSkill of pvmSkills) {
+                delete skillTotals[pvmSkill];
+            }
+            
+            // Skill icons mapping
+            const skillIcons = {
+                woodcutting: '🪓',
+                mining: '⛏️',
+                fishing: '🎣',
+                cooking: '🍗',
+                crafting: '🧵',
+                carpentry: '🔨',
+                farming: '🌱',
+                agility: '🏃'
+            };
+            
+            const skillsList = document.getElementById('clanSkillsList');
+            skillsList.innerHTML = '';
+            
+            // Create skill display for each skill
+            for (const [skillName, level] of Object.entries(skillTotals)) {
+                const icon = skillIcons[skillName] || '📊';
+                const percentage = (level / maxPerSkill) * 100;
+                
+                const skillDiv = document.createElement('div');
+                skillDiv.style.cssText = 'background: rgba(0,0,0,0.3); border: 2px solid #2a3a4a; border-radius: 8px; padding: 10px;';
+                
+                skillDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                        <div style="font-size: 20px;">${icon}</div>
+                        <div style="color: #fff; font-size: 13px; font-weight: bold;">${level}/${maxPerSkill}</div>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden;">
+                        <div style="width: ${percentage}%; height: 100%; background: linear-gradient(90deg, #4a9a8a, #5abaaa); transition: width 0.3s;"></div>
+                    </div>
+                `;
+                
+                skillsList.appendChild(skillDiv);
+            }
+            
+            // If no skills, show message
+            if (Object.keys(skillTotals).length === 0) {
+                skillsList.innerHTML = '<div style="grid-column: 1 / -1; color: #8a9aaa; text-align: center; padding: 20px;">No skills data available</div>';
+            }
         }
 
         // Load clan members
@@ -3467,29 +3513,64 @@ const firebaseConfig = {
                 return;
             }
 
-            snapshot.forEach((memberSnap) => {
-                const member = memberSnap.val();
-                const memberId = memberSnap.key;
+            const maxPerSkill = 495; // 99 * 5 members max
+
+            for (const memberSnap of snapshot.val() ? Object.entries(snapshot.val()) : []) {
+                const [memberId, member] = memberSnap;
                 const isCurrentUser = memberId === currentUser.uid;
                 const isLeader = member.role === 'Leader';
                 const canKick = playerProfile.clanRole === 'Leader' && !isLeader && !isCurrentUser;
 
+                // Fetch member's skills
+                const skillsSnapshot = await database.ref(`players/${memberId}/skills`).once('value');
+                const skills = skillsSnapshot.val() || {};
+
                 const memberDiv = document.createElement('div');
-                memberDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a; border-radius: 5px;';
+                memberDiv.style.cssText = 'padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid #2a3a4a; border-radius: 8px; margin-bottom: 8px;';
                 
                 let roleIcon = '';
                 if (isLeader) roleIcon = '👑';
                 
+                // Build stats display with progress bars
+                const statsToShow = [
+                    { name: 'HP', skill: 'hitpoints', icon: '❤️' },
+                    { name: 'Attack', skill: 'attack', icon: '⚔️' },
+                    { name: 'Strength', skill: 'strength', icon: '💪' },
+                    { name: 'Defence', skill: 'defence', icon: '🛡️' },
+                    { name: 'Ranged', skill: 'ranged', icon: '🏹' },
+                    { name: 'Magic', skill: 'magic', icon: '✨' }
+                ];
+
+                let statsHTML = '';
+                for (const stat of statsToShow) {
+                    const level = skills[stat.skill] || 1;
+                    const percentage = (level / maxPerSkill) * 100;
+                    statsHTML += `
+                        <div style="margin-bottom: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                <span style="color: #8a9aaa; font-size: 11px;">${stat.icon} ${stat.name}</span>
+                                <span style="color: #fff; font-size: 11px; font-weight: bold;">${level}/${maxPerSkill}</span>
+                            </div>
+                            <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${percentage}%; height: 100%; background: linear-gradient(90deg, #4a9a8a, #5abaaa); transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
                 memberDiv.innerHTML = `
-                    <div>
-                        <div style="color: ${isLeader ? '#FFD700' : '#5abaaa'}; font-weight: bold; font-size: 13px;">${roleIcon} ${member.username}</div>
-                        <div style="color: #8a9aaa; font-size: 11px;">${member.role}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <div style="color: ${isLeader ? '#FFD700' : '#5abaaa'}; font-weight: bold; font-size: 13px;">${roleIcon} ${member.username}</div>
+                            <div style="color: #8a9aaa; font-size: 11px;">${member.role}</div>
+                        </div>
+                        ${canKick ? `<button class="kick-member-btn" data-member-id="${memberId}" style="padding: 4px 8px; background: #8a2a2a; border: 1px solid #9a3a3a; border-radius: 5px; color: #ff6666; cursor: pointer; font-size: 11px; font-weight: bold;">Kick</button>` : ''}
                     </div>
-                    ${canKick ? `<button class="kick-member-btn" data-member-id="${memberId}" style="padding: 4px 8px; background: #8a2a2a; border: 1px solid #9a3a3a; border-radius: 5px; color: #ff6666; cursor: pointer; font-size: 11px; font-weight: bold;">Kick</button>` : ''}
+                    ${statsHTML}
                 `;
                 
                 membersList.appendChild(memberDiv);
-            });
+            }
 
             // Add kick handlers
             document.querySelectorAll('.kick-member-btn').forEach(btn => {
@@ -3533,8 +3614,8 @@ const firebaseConfig = {
             const storageGrid = document.getElementById('clanStorageGrid');
             storageGrid.innerHTML = '';
             
-            // Create 8 storage slots (0/8 by default)
-            for (let i = 0; i < 8; i++) {
+            // Create 16 storage slots (free)
+            for (let i = 0; i < 16; i++) {
                 const slot = document.createElement('div');
                 slot.style.cssText = 'width: 60px; height: 60px; background: rgba(0,0,0,0.5); border: 2px solid #2a3a4a; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s;';
                 slot.innerHTML = '<div style="color: #4a5a6a; font-size: 24px;">🔒</div>';
@@ -3548,17 +3629,16 @@ const firebaseConfig = {
             }
             
             document.getElementById('clanGold').textContent = '0';
-            document.getElementById('purchasedSpace').textContent = '0';
             document.getElementById('totalSpace').textContent = '0';
         }
 
         // Initialize clan storage in the Storage tab
-        function initializeClanStorageTab() {
+        async function initializeClanStorageTab() {
             const storageGrid = document.getElementById('clanStorageGridTab');
             storageGrid.innerHTML = '';
             
-            // Create 8 storage slots (0/8 by default)
-            for (let i = 0; i < 8; i++) {
+            // Create 16 storage slots (free)
+            for (let i = 0; i < 16; i++) {
                 const slot = document.createElement('div');
                 slot.style.cssText = 'width: 60px; height: 60px; background: rgba(0,0,0,0.5); border: 2px solid #2a3a4a; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s;';
                 slot.innerHTML = '<div style="color: #4a5a6a; font-size: 24px;">🔒</div>';
@@ -3571,8 +3651,16 @@ const firebaseConfig = {
                 storageGrid.appendChild(slot);
             }
             
-            document.getElementById('clanGoldTab').textContent = '0';
-            document.getElementById('purchasedSpaceTab').textContent = '0';
+            // Load clan gold from Firebase
+            if (playerProfile.clanId && database) {
+                const clanGoldRef = database.ref(`clans/${playerProfile.clanId}/gold`);
+                const snapshot = await clanGoldRef.once('value');
+                const clanGold = snapshot.val() || 0;
+                document.getElementById('clanGoldTab').textContent = clanGold;
+            } else {
+                document.getElementById('clanGoldTab').textContent = '0';
+            }
+            
             document.getElementById('totalSpaceTab').textContent = '0';
         }
 
@@ -3612,12 +3700,54 @@ const firebaseConfig = {
         });
 
         // Clan storage modal
+        // PvM stats button removed - keeping modal code for reference
+        /*
         document.getElementById('pvmStatsBtn').addEventListener('click', () => {
             document.getElementById('pvmStatsModal').style.display = 'block';
         });
+        */
 
         document.getElementById('closePvmStats').addEventListener('click', () => {
             document.getElementById('pvmStatsModal').style.display = 'none';
+        });
+
+        // Add Money button (in Storage tab)
+        document.addEventListener('click', async (e) => {
+            if (e.target && e.target.id === 'addMoneyBtn') {
+                if (!currentUser || !database || !playerProfile.clanId) {
+                    showFloatingText('Error: Not in a clan or not signed in', canvas.width / 2, 100, '#ff4444');
+                    return;
+                }
+                
+                const amount = prompt('How much gold do you want to add to the clan vault?');
+                if (!amount || isNaN(amount) || parseInt(amount) <= 0) {
+                    showFloatingText('Invalid amount', canvas.width / 2, 100, '#ff4444');
+                    return;
+                }
+                
+                const goldAmount = parseInt(amount);
+                
+                // Check if player has enough gold
+                if (gameState.player.gold < goldAmount) {
+                    showFloatingText('Not enough gold', canvas.width / 2, 100, '#ff4444');
+                    return;
+                }
+                
+                // Deduct from player
+                gameState.player.gold -= goldAmount;
+                
+                // Add to clan vault
+                const clanRef = database.ref(`clans/${playerProfile.clanId}/gold`);
+                const snapshot = await clanRef.once('value');
+                const currentClanGold = snapshot.val() || 0;
+                await clanRef.set(currentClanGold + goldAmount);
+                
+                // Update display
+                document.getElementById('clanGoldTab').textContent = currentClanGold + goldAmount;
+                updateGoldDisplay();
+                
+                showFloatingText(`Added ${goldAmount} gold to clan vault`, canvas.width / 2, 100, '#5abaaa');
+            }
         });
 
         // Recruitment center
